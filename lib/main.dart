@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/model/point.dart';
+import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 
 const vahicleCapacity = 200;
@@ -120,7 +121,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'VRPTW',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
@@ -144,7 +145,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-          title: const Text("VRPTW"),
+          title: const Text('VRPTW'),
         ),
         body: SingleChildScrollView(
           child: SizedBox(
@@ -159,7 +160,13 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                for (Point point in _points) Text(point.toString())
+                for (Point point in _points) Text(point.toString()),
+                _CoordinatePlane(
+                  points: _points,
+                ),
+                const SizedBox(
+                  height: 80,
+                )
               ],
             ),
           ),
@@ -175,5 +182,20 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
     setState(() {
       _points = Parser.parse(data, numberOfPoints);
     });
+  }
+}
+
+class _CoordinatePlane extends StatelessWidget {
+  final List<Point> points;
+
+  const _CoordinatePlane({required this.points});
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: CustomPaint(
+        size: Size(MediaQuery.of(context).size.width - 40, 600),
+        painter: CoordinatePainter(points: points, zoomX: 12, zoomY: 7),
+      ),
+    );
   }
 }
