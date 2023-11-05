@@ -181,6 +181,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   void _parsePoints() {
     setState(() {
       _points = Parser.parse(data, numberOfPoints);
+      _points[4].getDistancesToPoints(_points);
     });
   }
 }
