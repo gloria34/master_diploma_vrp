@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
+import 'package:master_diploma_vrp/model/ant.dart';
 import 'package:master_diploma_vrp/model/point.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
@@ -148,6 +149,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   List<Point> _points = [];
+  List<Ant> _ants = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,7 +191,10 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   void _parsePoints() {
     setState(() {
       _points = Parser.parse(data, numberOfCustomers);
-      _points[4].getDistancesToPoints(_points);
+      _ants.clear();
+      for (int i = 0; i < numberOfAnts; i++) {
+        _ants.add(Ant(_points));
+      }
     });
   }
 }
