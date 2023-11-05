@@ -1,4 +1,114 @@
+import 'dart:async';
+
+import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
+import 'package:master_diploma_vrp/model/point.dart';
+import 'package:master_diploma_vrp/utils/parser.dart';
+
+const vahicleCapacity = 200;
+const numberOfPoints = 101;
+const data =
+    """1      35.00      35.00       0.00       0.00     230.00       0.00
+    2      41.00      49.00      10.00     161.00     171.00      10.00
+    3      35.00      17.00       7.00      50.00      60.00      10.00
+    4      55.00      45.00      13.00     116.00     126.00      10.00
+    5      55.00      20.00      19.00     149.00     159.00      10.00
+    6      15.00      30.00      26.00      34.00      44.00      10.00
+    7      25.00      30.00       3.00      99.00     109.00      10.00
+    8      20.00      50.00       5.00      81.00      91.00      10.00
+    9      10.00      43.00       9.00      95.00     105.00      10.00
+   10      55.00      60.00      16.00      97.00     107.00      10.00
+   11      30.00      60.00      16.00     124.00     134.00      10.00
+   12      20.00      65.00      12.00      67.00      77.00      10.00
+   13      50.00      35.00      19.00      63.00      73.00      10.00
+   14      30.00      25.00      23.00     159.00     169.00      10.00
+   15      15.00      10.00      20.00      32.00      42.00      10.00
+   16      30.00       5.00       8.00      61.00      71.00      10.00
+   17      10.00      20.00      19.00      75.00      85.00      10.00
+   18       5.00      30.00       2.00     157.00     167.00      10.00
+   19      20.00      40.00      12.00      87.00      97.00      10.00
+   20      15.00      60.00      17.00      76.00      86.00      10.00
+   21      45.00      65.00       9.00     126.00     136.00      10.00
+   22      45.00      20.00      11.00      62.00      72.00      10.00
+   23      45.00      10.00      18.00      97.00     107.00      10.00
+   24      55.00       5.00      29.00      68.00      78.00      10.00
+   25      65.00      35.00       3.00     153.00     163.00      10.00
+   26      65.00      20.00       6.00     172.00     182.00      10.00
+   27      45.00      30.00      17.00     132.00     142.00      10.00
+   28      35.00      40.00      16.00      37.00      47.00      10.00
+   29      41.00      37.00      16.00      39.00      49.00      10.00
+   30      64.00      42.00       9.00      63.00      73.00      10.00
+   31      40.00      60.00      21.00      71.00      81.00      10.00
+   32      31.00      52.00      27.00      50.00      60.00      10.00
+   33      35.00      69.00      23.00     141.00     151.00      10.00
+   34      53.00      52.00      11.00      37.00      47.00      10.00
+   35      65.00      55.00      14.00     117.00     127.00      10.00
+   36      63.00      65.00       8.00     143.00     153.00      10.00
+   37       2.00      60.00       5.00      41.00      51.00      10.00
+   38      20.00      20.00       8.00     134.00     144.00      10.00
+   39       5.00       5.00      16.00      83.00      93.00      10.00
+   40      60.00      12.00      31.00      44.00      54.00      10.00
+   41      40.00      25.00       9.00      85.00      95.00      10.00
+   42      42.00       7.00       5.00      97.00     107.00      10.00
+   43      24.00      12.00       5.00      31.00      41.00      10.00
+   44      23.00       3.00       7.00     132.00     142.00      10.00
+   45      11.00      14.00      18.00      69.00      79.00      10.00
+   46       6.00      38.00      16.00      32.00      42.00      10.00
+   47       2.00      48.00       1.00     117.00     127.00      10.00
+   48       8.00      56.00      27.00      51.00      61.00      10.00
+   49      13.00      52.00      36.00     165.00     175.00      10.00
+   50       6.00      68.00      30.00     108.00     118.00      10.00
+   51      47.00      47.00      13.00     124.00     134.00      10.00
+   52      49.00      58.00      10.00      88.00      98.00      10.00
+   53      27.00      43.00       9.00      52.00      62.00      10.00
+   54      37.00      31.00      14.00      95.00     105.00      10.00
+   55      57.00      29.00      18.00     140.00     150.00      10.00
+   56      63.00      23.00       2.00     136.00     146.00      10.00
+   57      53.00      12.00       6.00     130.00     140.00      10.00
+   58      32.00      12.00       7.00     101.00     111.00      10.00
+   59      36.00      26.00      18.00     200.00     210.00      10.00
+   60      21.00      24.00      28.00      18.00      28.00      10.00
+   61      17.00      34.00       3.00     162.00     172.00      10.00
+   62      12.00      24.00      13.00      76.00      86.00      10.00
+   63      24.00      58.00      19.00      58.00      68.00      10.00
+   64      27.00      69.00      10.00      34.00      44.00      10.00
+   65      15.00      77.00       9.00      73.00      83.00      10.00
+   66      62.00      77.00      20.00      51.00      61.00      10.00
+   67      49.00      73.00      25.00     127.00     137.00      10.00
+   68      67.00       5.00      25.00      83.00      93.00      10.00
+   69      56.00      39.00      36.00     142.00     152.00      10.00
+   70      37.00      47.00       6.00      50.00      60.00      10.00
+   71      37.00      56.00       5.00     182.00     192.00      10.00
+   72      57.00      68.00      15.00      77.00      87.00      10.00
+   73      47.00      16.00      25.00      35.00      45.00      10.00
+   74      44.00      17.00       9.00      78.00      88.00      10.00
+   75      46.00      13.00       8.00     149.00     159.00      10.00
+   76      49.00      11.00      18.00      69.00      79.00      10.00
+   77      49.00      42.00      13.00      73.00      83.00      10.00
+   78      53.00      43.00      14.00     179.00     189.00      10.00
+   79      61.00      52.00       3.00      96.00     106.00      10.00
+   80      57.00      48.00      23.00      92.00     102.00      10.00
+   81      56.00      37.00       6.00     182.00     192.00      10.00
+   82      55.00      54.00      26.00      94.00     104.00      10.00
+   83      15.00      47.00      16.00      55.00      65.00      10.00
+   84      14.00      37.00      11.00      44.00      54.00      10.00
+   85      11.00      31.00       7.00     101.00     111.00      10.00
+   86      16.00      22.00      41.00      91.00     101.00      10.00
+   87       4.00      18.00      35.00      94.00     104.00      10.00
+   88      28.00      18.00      26.00      93.00     103.00      10.00
+   89      26.00      52.00       9.00      74.00      84.00      10.00
+   90      26.00      35.00      15.00     176.00     186.00      10.00
+   91      31.00      67.00       3.00      95.00     105.00      10.00
+   92      15.00      19.00       1.00     160.00     170.00      10.00
+   93      22.00      22.00       2.00      18.00      28.00      10.00
+   94      18.00      24.00      22.00     188.00     198.00      10.00
+   95      26.00      27.00      27.00     100.00     110.00      10.00
+   96      25.00      24.00      20.00      39.00      49.00      10.00
+   97      22.00      27.00      11.00     135.00     145.00      10.00
+   98      25.00      21.00      12.00     133.00     143.00      10.00
+   99      19.00      21.00      10.00      58.00      68.00      10.00
+  100      20.00      26.00       9.00      83.00      93.00      10.00
+  101      18.00      18.00      17.00     185.00     195.00      10.00""";
 
 void main() {
   runApp(const MyApp());
@@ -7,119 +117,63 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
+  List<Point> _points = [];
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text("VRPTW"),
+        ),
+        body: SingleChildScrollView(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Text(
+                    "VEHICLE CAPACITY: $vahicleCapacity",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                for (Point point in _points) Text(point.toString())
+              ],
+            ),
+          ),
+        ));
   }
 
   @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+  FutureOr<void> afterFirstLayout(BuildContext context) {
+    _parsePoints();
+  }
+
+  void _parsePoints() {
+    setState(() {
+      _points = Parser.parse(data, numberOfPoints);
+    });
   }
 }
