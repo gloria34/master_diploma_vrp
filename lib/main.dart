@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/model/ant.dart';
+import 'package:master_diploma_vrp/model/edge.dart';
 import 'package:master_diploma_vrp/model/point.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
@@ -119,6 +120,7 @@ const evaporationRate = 0.1;
 const pheromoneImportance = 1;
 const heuristicImportance = 1;
 const numberOfIterations = 5000;
+const initialPheromoneValue = 0.1;
 
 void main() {
   runApp(const MyApp());
@@ -149,7 +151,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   List<Point> _points = [];
-  List<Ant> _ants = [];
+  final List<Ant> _ants = [];
+  final List<Edge> _edges = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -195,6 +198,18 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
       for (int i = 0; i < numberOfAnts; i++) {
         _ants.add(Ant(_points));
       }
+      _edges.clear();
+      for (Point point1 in _points) {
+        for (Point point2 in _points) {
+          if (point1 != point2) {
+            _edges.add(Edge(
+                pheromone: initialPheromoneValue,
+                startLocation: point1,
+                endLocation: point2));
+          }
+        }
+      }
+      _edges;
     });
   }
 }
