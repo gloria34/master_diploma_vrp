@@ -1,14 +1,14 @@
 import 'package:master_diploma_vrp/model/point.dart';
 
 abstract class Parser {
-  static List<Point> parse(String data, int numberOfPoints) {
+  static List<Point> parse(String data, int numberOfCustomers) {
     List<Point> points = [];
     data = data.replaceAll("      ", " ");
     data = data.replaceAll("     ", " ");
     data = data.replaceAll("    ", " ");
     data = data.replaceAll("   ", " ");
     data = data.replaceAll("  ", " ");
-    for (var i = 0; i < numberOfPoints; i++) {
+    for (var i = 0; i < numberOfCustomers; i++) {
       Point point = Point(
           number: int.parse(data.split(" ")[0 + i * 7]),
           x: double.parse(data.split(" ")[1 + i * 7]),

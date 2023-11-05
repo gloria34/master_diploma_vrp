@@ -6,8 +6,9 @@ import 'package:master_diploma_vrp/model/point.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 
+//problem details
 const vahicleCapacity = 200;
-const numberOfPoints = 101;
+const numberOfCustomers = 101;
 const data =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
     2      41.00      49.00      10.00     161.00     171.00      10.00
@@ -111,6 +112,13 @@ const data =
   100      20.00      26.00       9.00      83.00      93.00      10.00
   101      18.00      18.00      17.00     185.00     195.00      10.00""";
 
+//ACO params
+const numberOfAnts = numberOfCustomers;
+const evaporationRate = 0.1;
+const pheromoneImportance = 1;
+const heuristicImportance = 1;
+const numberOfIterations = 5000;
+
 void main() {
   runApp(const MyApp());
 }
@@ -180,7 +188,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
 
   void _parsePoints() {
     setState(() {
-      _points = Parser.parse(data, numberOfPoints);
+      _points = Parser.parse(data, numberOfCustomers);
       _points[4].getDistancesToPoints(_points);
     });
   }
