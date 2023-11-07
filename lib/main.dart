@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 
 //problem details
-const vahicleCapacity = 200;
+const vahicleCapacity = 200.0;
 const numberOfCustomers = 101;
 const data =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
@@ -115,12 +116,13 @@ const data =
   101      18.00      18.00      17.00     185.00     195.00      10.00""";
 
 //ACO params
-const numberOfAnts = numberOfCustomers;
+const numberOfAnts = numberOfCustomers - 1;
 const evaporationRate = 0.1;
 const pheromoneImportance = 1;
 const heuristicImportance = 1;
-const numberOfIterations = 5000;
+const numberOfIterations = 100;
 const initialPheromoneValue = 0.1;
+const initialHeuristicValue = 0.1;
 
 void main() {
   runApp(const MyApp());
@@ -153,6 +155,8 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   List<Point> _points = [];
   final List<Ant> _ants = [];
   final List<Edge> _edges = [];
+  List<Edge> _availableEdges = [];
+  double _maxDistance = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,6 +193,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) {
     _parsePoints();
+    _buildSolutions();
   }
 
   void _parsePoints() {
@@ -202,15 +207,77 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
       for (Point point1 in _points) {
         for (Point point2 in _points) {
           if (point1 != point2) {
-            _edges.add(Edge(
+            final edge = Edge(
+                heuristic: initialHeuristicValue,
                 pheromone: initialPheromoneValue,
                 startLocation: point1,
-                endLocation: point2));
+                endLocation: point2);
+            final edgeDistanse = edge.getDistance();
+            if (edgeDistanse > _maxDistance) {
+              _maxDistance = edgeDistanse;
+            }
+            _edges.add(edge);
           }
         }
       }
-      _edges;
+      _availableEdges = _edges;
     });
+  }
+
+  double calculateEdgeProbability(
+      Edge edge, double currentTime, double remainingCapacity) {
+    double probability = (pow(edge.pheromone, pheromoneImportance) *
+            pow(
+                edge.calculateHeuristicValue(_maxDistance, currentTime,
+                    remainingCapacity, _edges.first.endLocation.dueTime),
+                heuristicImportance))
+        .toDouble();
+    return probability;
+  }
+
+  void _buildSolutions() {
+    for (int _ = 0; _ < numberOfIterations; _++) {
+      for (Ant ant in _ants) {
+        bool isSolutionExists = false;
+        for (Edge edge in _availableEdges) {
+          if (edge.startLocation.number == ant.currentPosition.number) {
+            double randomValue = Random().nextDouble();
+            double probability = calculateEdgeProbability(edge,
+                ant.currentRoute.time, ant.currentRoute.remainingCapacity);
+            if (randomValue <= probability) {
+              isSolutionExists = true;
+              if (edge.endLocation.number == _points.first.number) {
+                _availableEdges.addAll(ant.currentRoute.edges);
+                ant = Ant(_points);
+              } else {
+                ant.currentPosition = edge.endLocation;
+                ant.currentRoute.edges.add(edge);
+                ant.visitedCustomers.add(edge.endLocation);
+                ant.currentRoute.distance += edge.getDistance();
+                ant.currentRoute.time += edge.getDistance();
+                if (ant.currentRoute.time < edge.endLocation.fromTime) {
+                  ant.currentRoute.time = edge.endLocation.fromTime;
+                }
+                ant.currentRoute.time += edge.endLocation.serviceTime;
+                ant.currentRoute.remainingCapacity -= edge.endLocation.demand;
+                edge.pheromone = edge.pheromone * evaporationRate;
+                _availableEdges.remove(edge);
+              }
+              break;
+            }
+          }
+        }
+        if (!isSolutionExists) {
+          _availableEdges.addAll(ant.currentRoute.edges);
+          ant = Ant(_points);
+        }
+      }
+    }
+    for (Ant ant in _ants) {
+      _availableEdges.addAll(ant.currentRoute.edges);
+      ant = Ant(_points);
+    }
+    _availableEdges;
   }
 }
 

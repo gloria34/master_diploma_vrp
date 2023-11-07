@@ -1,4 +1,3 @@
-
 class Point {
   final int number;
   final double x;
