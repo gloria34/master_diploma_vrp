@@ -1,5 +1,6 @@
+import 'package:equatable/equatable.dart';
 
-class Point {
+class Point extends Equatable {
   final int number;
   final double x;
   final double y;
@@ -21,4 +22,7 @@ class Point {
   String toString() {
     return "#$number x=$x; y=$y; demand=$demand; form time=$fromTime; due time=$dueTime; service time=$serviceTime.";
   }
+
+  @override
+  List<Object?> get props => [number];
 }
