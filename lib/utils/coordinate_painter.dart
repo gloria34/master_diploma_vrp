@@ -1,18 +1,21 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:master_diploma_vrp/model/answer.dart';
 import 'package:master_diploma_vrp/model/point.dart';
 
 class CoordinatePainter extends CustomPainter {
   final List<Point> points;
   final int zoomX;
   final int zoomY;
+  final Answer? answer;
 
   CoordinatePainter(
       {super.repaint,
       required this.points,
       required this.zoomX,
-      required this.zoomY});
+      required this.zoomY,
+      required this.answer});
 
   @override
   void paint(Canvas canvas, Size size) {

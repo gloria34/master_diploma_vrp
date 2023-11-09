@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/aco/aco.dart';
+import 'package:master_diploma_vrp/model/answer.dart';
 import 'package:master_diploma_vrp/model/edge.dart';
 import 'package:master_diploma_vrp/model/point.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
@@ -25,11 +26,12 @@ const data =
 
 //ACO params
 const numberOfAnts = numberOfCustomers - 1;
-const evaporationRate = 0.1;
+const evaporationRate = 0.5;
 const pheromoneImportance = 1;
 const heuristicImportance = 1;
 const numberOfIterations = 100;
 const initialPheromoneValue = 0.1;
+const trailDepositCoefficient = 500;
 late Point depot;
 
 void main() {
@@ -62,6 +64,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   List<Point> _points = [];
   final Map<Point, List<Edge>> _edges = {};
+  Answer? _answer;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,6 +88,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
                 for (Point point in _points) Text(point.toString()),
                 _CoordinatePlane(
                   points: _points,
+                  answer: _answer,
                 ),
                 const SizedBox(
                   height: 80,
@@ -98,7 +102,9 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) {
     _parsePoints();
-    ACO(points: _points, edges: _edges).solve();
+    setState(() {
+      _answer = ACO(points: _points, edges: _edges).solve();
+    });
   }
 
   void _parsePoints() {
@@ -123,14 +129,16 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
 
 class _CoordinatePlane extends StatelessWidget {
   final List<Point> points;
+  final Answer? answer;
 
-  const _CoordinatePlane({required this.points});
+  const _CoordinatePlane({required this.points, required this.answer});
   @override
   Widget build(BuildContext context) {
     return Center(
       child: CustomPaint(
         size: Size(MediaQuery.of(context).size.width - 40, 600),
-        painter: CoordinatePainter(points: points, zoomX: 12, zoomY: 7),
+        painter: CoordinatePainter(
+            points: points, zoomX: 12, zoomY: 7, answer: answer),
       ),
     );
   }
