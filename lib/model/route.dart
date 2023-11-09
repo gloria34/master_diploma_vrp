@@ -5,7 +5,7 @@ import 'package:master_diploma_vrp/model/point.dart';
 class Route {
   double distance = 0.0;
   double time = 0.0;
-  double demand = vahicleCapacity;
+  double demand = vehicleCapacity;
   List<Point> visitedCustomers = [];
   List<Edge> visitedEdges = [];
 }
