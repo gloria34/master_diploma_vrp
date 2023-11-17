@@ -3,7 +3,7 @@ import 'package:master_diploma_vrp/model/ant.dart';
 import 'package:master_diploma_vrp/model/edge.dart';
 
 abstract class Heuristic {
-  static double claculateHeuristic(Ant ant, Edge edge) {
+  static double calculateHeuristic(Ant ant, Edge edge) {
     final timeWindowsProbability = _calculateTimeWindowsProbability(ant, edge);
     final demandProbability = _calculateDemandProbability(ant, edge);
     return timeWindowsProbability * demandProbability * heuristicImportance;

@@ -7,6 +7,6 @@ abstract class Probability {
   static double calculateProbability(Ant ant, Edge edge) {
     return edge.pheromone *
         pheromoneImportance *
-        Heuristic.claculateHeuristic(ant, edge);
+        Heuristic.calculateHeuristic(ant, edge);
   }
 }
