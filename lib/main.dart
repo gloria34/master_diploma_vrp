@@ -250,7 +250,8 @@ class _AnswerInfo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("Number of vehicles = ${answer.bestRoutes.length}"),
-        Text("Distance = ${_calculateAnswerDistance()}")
+        Text("Distance = ${_calculateAnswerDistance()}"),
+        for (final route in answer.bestRoutes) Text(route.toString())
       ],
     );
   }
