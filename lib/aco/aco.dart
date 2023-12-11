@@ -13,7 +13,7 @@ class ACO {
   final Map<Point, List<Edge>> edges;
   final List<Route> _routes = [];
   final List<Ant> _ants = [];
-  List<Point> _points = [];
+  final List<Point> _points = [];
   Answer bestAnswer = Answer();
   ACO({required this.points, required this.edges});
 

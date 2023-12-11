@@ -11,7 +11,7 @@ class BestRoute {
   String toString() {
     String points = "";
     for (Point customer in route.visitedCustomers) {
-      points += customer.number.toString();
+      points += "${customer.number.toString()} ";
     }
     return "cost = $cost, points = [$points], demand = ${route.demand}";
   }

@@ -121,6 +121,7 @@ const numberOfAnts = numberOfCustomers - 1;
 const evaporationRate = 0.5;
 const pheromoneImportance = 1;
 const heuristicImportance = 1;
+const timeWindowsImportance = 1;
 const numberOfIterations = 100;
 const initialPheromoneValue = 0.1;
 const trailDepositCoefficient = 500;
@@ -243,7 +244,7 @@ class _CoordinatePlane extends StatelessWidget {
 class _AnswerInfo extends StatelessWidget {
   final Answer answer;
 
-  const _AnswerInfo({super.key, required this.answer});
+  const _AnswerInfo({required this.answer});
   @override
   Widget build(BuildContext context) {
     return Column(
