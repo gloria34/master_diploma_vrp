@@ -14,8 +14,12 @@ class ACO {
   final List<Route> _routes = [];
   final List<Ant> _ants = [];
   final List<Point> _points = [];
+  late Map<Point, List<Edge>> _edgesWithCost;
   Answer bestAnswer = Answer();
-  ACO({required this.points, required this.edges});
+
+  ACO({required this.points, required this.edges}) {
+    _edgesWithCost = edges;
+  }
 
   Answer solve() {
     _initAntColony();
@@ -52,6 +56,7 @@ class ACO {
     _routes.clear();
     _points.clear();
     _points.addAll(points);
+    _edgesWithCost = edges;
   }
 
   void _resetAntRoute(Ant ant) {
@@ -90,6 +95,13 @@ class ACO {
     Answer answer = Answer();
     for (Route route in _routes) {
       var routeCost = Cost.calculateCost(route);
+      for (Edge visitedEdge in route.visitedEdges) {
+        _edgesWithCost[visitedEdge.startLocation]!
+            .where((element) => element.endLocation == visitedEdge.endLocation)
+            .first
+            .costs
+            .add(routeCost);
+      }
       answer.bestRoutes.add(BestRoute(route: route)..cost = routeCost);
       answer.cost += routeCost;
       if (routeCost > bestRoute.cost) {
@@ -107,7 +119,14 @@ class ACO {
     for (Edge edge1 in bestRoute.route.visitedEdges) {
       for (Edge edge2 in edges[edge1.startLocation]!) {
         if (edge1.endLocation == edge2.endLocation) {
-          edge2.pheromone += bestRoute.cost;
+          double sum = 0.0;
+          for (final cost in _edgesWithCost[edge1.startLocation]!
+              .where((element) => element.endLocation == edge2.endLocation)
+              .first
+              .costs) {
+            sum += cost;
+          }
+          edge2.pheromone = (1 - evaporationRate) * edge2.pheromone + sum;
         }
       }
     }

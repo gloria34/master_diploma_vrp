@@ -5,8 +5,8 @@ import 'package:master_diploma_vrp/model/route.dart';
 abstract class Cost {
   static double calculateCost(Route route) {
     final distance = _calculateDistance(route);
-    final timeFines = _calculateTimeFines(route);
-    return distance - timeFines;
+   // final timeFines = _calculateTimeFines(route);
+    return distance;
   }
 
   static double _calculateDistance(Route route) {

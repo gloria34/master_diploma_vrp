@@ -9,7 +9,7 @@ class Point extends Equatable {
   final double dueTime;
   final double serviceTime;
 
-  Point(
+  const Point(
       {required this.number,
       required this.x,
       required this.y,

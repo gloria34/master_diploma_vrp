@@ -6,6 +6,7 @@ class Edge {
   final Point startLocation;
   final Point endLocation;
   double pheromone;
+  final List<double> costs = [];
 
   Edge(
       {required this.pheromone,
