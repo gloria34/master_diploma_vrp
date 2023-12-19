@@ -2,13 +2,14 @@ import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
-import 'package:master_diploma_vrp/aco/aco.dart';
 import 'package:master_diploma_vrp/aco/aco_variant.dart';
 import 'package:master_diploma_vrp/model/answer.dart';
 import 'package:master_diploma_vrp/model/best_route.dart';
 import 'package:master_diploma_vrp/model/edge.dart';
 import 'package:master_diploma_vrp/model/point.dart';
+import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
+import 'package:master_diploma_vrp/model/tour.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 
@@ -157,9 +158,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
-  List<Point> _points = [];
+  List<PointVariant> _points = [];
   final Map<Point, List<Edge>> _edges = {};
-  Answer? _answer;
+  List<Tour>? _answer;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -180,18 +181,18 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
-                for (Point point in _points) Text(point.toString()),
+                for (PointVariant point in _points) Text(point.toString()),
                 _CoordinatePlane(
                   points: _points,
                   answer: _answer,
                 ),
                 if (_answer != null)
-                  _AnswerInfo(
-                    answer: _answer!,
-                  ),
-                const SizedBox(
-                  height: 80,
-                )
+                  // _AnswerInfo(
+                  //   answer: _answer!,
+                  // ),
+                  const SizedBox(
+                    height: 80,
+                  )
               ],
             ),
           ),
@@ -205,43 +206,50 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
     //   _answer = ACO(points: _points, edges: _edges).solve();
     // });
     //load problem and parameters
-		Problem load = Parser.parseVariant(data, numberOfCustomers);
-		
-		//time start
-		int start = DateTime.now().millisecondsSinceEpoch;
-		
-		//apply ACO
-		ACOVariant solutions = ACOVariant();
-		solutions = ACOVariant.ant_main(load,start);
-		
-		//time end
-		int end = DateTime.now().millisecondsSinceEpoch;
-		int e_s = end - start;
+    Problem load = Parser.parseVariant(data, numberOfCustomers);
+
+    setState(() {
+      _points = load.customer;
+    });
+
+    //time start
+    int start = DateTime.now().millisecondsSinceEpoch;
+
+    //apply ACO
+    ACOVariant solutions = ACOVariant();
+    solutions = ACOVariant.ant_main(load, start);
+    setState(() {
+      _answer = solutions.pareto_sols;
+    });
+
+    //time end
+    int end = DateTime.now().millisecondsSinceEpoch;
+    int e_s = end - start;
   }
 
-  void _parsePoints() {
-    setState(() {
-      _points = Parser.parse(data, numberOfCustomers);
-      _edges.clear();
-      for (Point point1 in _points) {
-        _edges[point1] = [];
-        for (Point point2 in _points) {
-          if (point1 != point2) {
-            _edges[point1]!.add(Edge(
-                pheromone: initialPheromoneValue,
-                startLocation: point1,
-                endLocation: point2));
-          }
-        }
-      }
-      depot = _points.first;
-    });
-  }
+  // void _parsePoints() {
+  //   setState(() {
+  //     _points = Parser.parse(data, numberOfCustomers);
+  //     _edges.clear();
+  //     for (Point point1 in _points) {
+  //       _edges[point1] = [];
+  //       for (Point point2 in _points) {
+  //         if (point1 != point2) {
+  //           _edges[point1]!.add(Edge(
+  //               pheromone: initialPheromoneValue,
+  //               startLocation: point1,
+  //               endLocation: point2));
+  //         }
+  //       }
+  //     }
+  //     depot = _points.first;
+  //   });
+  // }
 }
 
 class _CoordinatePlane extends StatelessWidget {
-  final List<Point> points;
-  final Answer? answer;
+  final List<PointVariant> points;
+  final List<Tour>? answer;
 
   const _CoordinatePlane({required this.points, required this.answer});
   @override

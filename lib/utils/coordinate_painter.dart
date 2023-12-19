@@ -1,17 +1,16 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:master_diploma_vrp/model/answer.dart';
-import 'package:master_diploma_vrp/model/best_route.dart';
-import 'package:master_diploma_vrp/model/edge.dart';
-import 'package:master_diploma_vrp/model/point.dart';
+import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'dart:math' as math;
 
+import 'package:master_diploma_vrp/model/tour.dart';
+
 class CoordinatePainter extends CustomPainter {
-  final List<Point> points;
+  final List<PointVariant> points;
   final int zoomX;
   final int zoomY;
-  final Answer? answer;
+  List<Tour>? answer;
 
   CoordinatePainter(
       {super.repaint,
@@ -24,13 +23,13 @@ class CoordinatePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     _drawAxis(canvas, size);
     final List<Offset> offsets = [];
-    for (Point point in points) {
-      double dx = point.x * zoomX;
-      double dy = size.height - (point.y * zoomY);
+    for (PointVariant point in points) {
+      double dx = point.position[0] * zoomX;
+      double dy = size.height - (point.position[1] * zoomY);
       offsets.add(Offset(dx, dy));
       // Draw legend
       final textSpan = TextSpan(
-        text: "#${point.number} (${point.x}; ${point.y})",
+        text: "#${point.number} (${point.position[0]}; ${point.position[1]})",
         style: const TextStyle(fontSize: 16.0),
       );
       final textPainter = TextPainter(
@@ -72,17 +71,21 @@ class CoordinatePainter extends CustomPainter {
   }
 
   void _drawLines(Canvas canvas, Size size) {
-    for (BestRoute route in answer!.bestRoutes) {
-      final paint = Paint()
-        ..color = Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
-            .withOpacity(1.0)
-        ..strokeWidth = 4;
-      for (Edge edge in route.route.visitedEdges) {
-        final p1 = Offset(edge.startLocation.x * zoomX,
-            size.height - (edge.startLocation.y * zoomY));
-        final p2 = Offset(edge.endLocation.x * zoomX,
-            size.height - (edge.endLocation.y * zoomY));
-        canvas.drawLine(p1, p2, paint);
+    if (answer?.isNotEmpty == true) {
+      for (List<int> route in answer!.first.route) {
+        final paint = Paint()
+          ..color = Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
+              .withOpacity(1.0)
+          ..strokeWidth = 4;
+        if (route.length > 1) {
+          for (int i = 0; i < route.length - 1; i++) {
+            final p1 = Offset(points[route[i]].position[0] * zoomX,
+                size.height - (points[route[i]].position[1] * zoomY));
+            final p2 = Offset(points[route[i + 1]].position[0] * zoomX,
+                size.height - (points[route[i + 1]].position[1] * zoomY));
+            canvas.drawLine(p1, p2, paint);
+          }
+        }
       }
     }
   }
