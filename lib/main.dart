@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/aco/aco.dart';
+import 'package:master_diploma_vrp/aco/aco_variant.dart';
 import 'package:master_diploma_vrp/model/answer.dart';
 import 'package:master_diploma_vrp/model/best_route.dart';
 import 'package:master_diploma_vrp/model/edge.dart';
 import 'package:master_diploma_vrp/model/point.dart';
+import 'package:master_diploma_vrp/model/problem.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 
@@ -198,10 +200,23 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
 
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) {
-    _parsePoints();
-    setState(() {
-      _answer = ACO(points: _points, edges: _edges).solve();
-    });
+    // _parsePoints();
+    // setState(() {
+    //   _answer = ACO(points: _points, edges: _edges).solve();
+    // });
+    //load problem and parameters
+		Problem load = Parser.parseVariant(data, numberOfCustomers);
+		
+		//time start
+		int start = DateTime.now().millisecondsSinceEpoch;
+		
+		//apply ACO
+		ACOVariant solutions = ACOVariant();
+		solutions = ACOVariant.ant_main(load,start);
+		
+		//time end
+		int end = DateTime.now().millisecondsSinceEpoch;
+		int e_s = end - start;
   }
 
   void _parsePoints() {
