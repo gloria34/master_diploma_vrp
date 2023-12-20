@@ -3,10 +3,6 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/aco/aco_variant.dart';
-import 'package:master_diploma_vrp/model/answer.dart';
-import 'package:master_diploma_vrp/model/best_route.dart';
-import 'package:master_diploma_vrp/model/edge.dart';
-import 'package:master_diploma_vrp/model/point.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
 import 'package:master_diploma_vrp/model/tour.dart';
@@ -128,7 +124,6 @@ const timeWindowsImportance = 1;
 const numberOfIterations = 100;
 const initialPheromoneValue = 0.1;
 const trailDepositCoefficient = 500;
-late Point depot;
 
 void main() {
   runApp(const MyApp());
@@ -159,8 +154,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   List<PointVariant> _points = [];
-  final Map<Point, List<Edge>> _edges = {};
-  List<Tour>? _answer;
+  ACOVariant? _solutions;
+  int time = 0;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -184,12 +179,13 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
                 for (PointVariant point in _points) Text(point.toString()),
                 _CoordinatePlane(
                   points: _points,
-                  answer: _answer,
+                  answer: _solutions?.pareto_sols,
                 ),
-                if (_answer != null)
-                  // _AnswerInfo(
-                  //   answer: _answer!,
-                  // ),
+                if (_solutions != null)
+                  _AnswerInfo(
+                    answer: _solutions!,
+                    time: time,
+                  ),
                   const SizedBox(
                     height: 80,
                   )
@@ -201,50 +197,19 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
 
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) {
-    // _parsePoints();
-    // setState(() {
-    //   _answer = ACO(points: _points, edges: _edges).solve();
-    // });
-    //load problem and parameters
     Problem load = Parser.parseVariant(data, numberOfCustomers);
-
     setState(() {
       _points = load.customer;
     });
-
-    //time start
     int start = DateTime.now().millisecondsSinceEpoch;
-
-    //apply ACO
     ACOVariant solutions = ACOVariant();
     solutions = ACOVariant.ant_main(load, start);
     setState(() {
-      _answer = solutions.pareto_sols;
+      _solutions = solutions;
     });
-
-    //time end
     int end = DateTime.now().millisecondsSinceEpoch;
-    int e_s = end - start;
+    time = end - start;
   }
-
-  // void _parsePoints() {
-  //   setState(() {
-  //     _points = Parser.parse(data, numberOfCustomers);
-  //     _edges.clear();
-  //     for (Point point1 in _points) {
-  //       _edges[point1] = [];
-  //       for (Point point2 in _points) {
-  //         if (point1 != point2) {
-  //           _edges[point1]!.add(Edge(
-  //               pheromone: initialPheromoneValue,
-  //               startLocation: point1,
-  //               endLocation: point2));
-  //         }
-  //       }
-  //     }
-  //     depot = _points.first;
-  //   });
-  // }
 }
 
 class _CoordinatePlane extends StatelessWidget {
@@ -265,26 +230,19 @@ class _CoordinatePlane extends StatelessWidget {
 }
 
 class _AnswerInfo extends StatelessWidget {
-  final Answer answer;
+  final ACOVariant answer;
+  final int time;
 
-  const _AnswerInfo({required this.answer});
+  const _AnswerInfo({required this.answer, required this.time});
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Number of vehicles = ${answer.bestRoutes.length}"),
-        Text("Distance = ${_calculateAnswerDistance()}"),
-        for (final route in answer.bestRoutes) Text(route.toString())
+        Text("Number of vehicles = ${answer.pareto_sols.first.route.length}"),
+        Text("Distance = ${answer.pareto_sols.first.J}"),
+        Text("Time = $time")
       ],
     );
-  }
-
-  double _calculateAnswerDistance() {
-    double distance = 0.0;
-    for (BestRoute bestRoute in answer.bestRoutes) {
-      distance += bestRoute.route.distance;
-    }
-    return distance;
   }
 }
