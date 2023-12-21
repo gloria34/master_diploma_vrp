@@ -9,7 +9,7 @@ import 'package:master_diploma_vrp/aco/tour.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 
-//problem details
+//initial problem details
 const vehicleCapacity = 200;
 const numberOfCustomers = 101;
 const ants = 40;
@@ -165,7 +165,9 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _ProblemParams(),
+                _ProblemParams(onSolveTap: (problem) {
+                  _solveProblem(problem);
+                }),
                 _CoordinatePlane(
                   points: _points,
                   answer: _solutions?.solutions,
@@ -186,13 +188,18 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
 
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) {
-    Problem load = Parser.parseVariant(initialProblem, numberOfCustomers);
+    Problem load = Parser.parseVariant(initialProblem, numberOfCustomers,
+        vehicleCapacity, ants, beta, q0, alpha, rho, iterations);
+    _solveProblem(load);
+  }
+
+  void _solveProblem(Problem problem) {
     setState(() {
-      _points = load.customer;
+      _points = problem.customer;
     });
     int start = DateTime.now().millisecondsSinceEpoch;
     ACO solutions = ACO();
-    solutions = ACO.aco(load, start);
+    solutions = ACO.aco(problem, start);
     setState(() {
       _solutions = solutions;
     });
@@ -202,6 +209,28 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
 }
 
 class _ProblemParams extends StatelessWidget {
+  final TextEditingController problemTextController =
+      TextEditingController(text: initialProblem);
+  final TextEditingController numberOfCustomersController =
+      TextEditingController(text: numberOfCustomers.toString());
+  final TextEditingController vehicleCapacityController =
+      TextEditingController(text: vehicleCapacity.toString());
+  final TextEditingController numberOfAntsController =
+      TextEditingController(text: ants.toString());
+  final TextEditingController numberOfIterationsController =
+      TextEditingController(text: iterations.toString());
+  final TextEditingController alphaController =
+      TextEditingController(text: alpha.toString());
+  final TextEditingController betaController =
+      TextEditingController(text: beta.toString());
+  final TextEditingController rhoController =
+      TextEditingController(text: rho.toString());
+  final TextEditingController q0Controller =
+      TextEditingController(text: q0.toString());
+  final Function(Problem) onSolveTap;
+
+  _ProblemParams({required this.onSolveTap});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -212,7 +241,7 @@ class _ProblemParams extends StatelessWidget {
             decoration: const InputDecoration(labelText: 'Problem text'),
             keyboardType: TextInputType.multiline,
             maxLines: null,
-            initialValue: initialProblem,
+            controller: problemTextController,
           ),
           Row(
             children: [
@@ -221,7 +250,7 @@ class _ProblemParams extends StatelessWidget {
                   decoration:
                       const InputDecoration(labelText: 'Number of customers'),
                   keyboardType: TextInputType.number,
-                  initialValue: numberOfCustomers.toString(),
+                  controller: numberOfCustomersController,
                 ),
               ),
               const SizedBox(
@@ -232,7 +261,7 @@ class _ProblemParams extends StatelessWidget {
                   decoration:
                       const InputDecoration(labelText: 'Vehicle capacity'),
                   keyboardType: TextInputType.number,
-                  initialValue: vehicleCapacity.toString(),
+                  controller: vehicleCapacityController,
                 ),
               ),
               const SizedBox(
@@ -243,7 +272,7 @@ class _ProblemParams extends StatelessWidget {
                   decoration:
                       const InputDecoration(labelText: 'Number of ants'),
                   keyboardType: TextInputType.number,
-                  initialValue: ants.toString(),
+                  controller: numberOfAntsController,
                 ),
               ),
               const SizedBox(
@@ -254,7 +283,7 @@ class _ProblemParams extends StatelessWidget {
                   decoration:
                       const InputDecoration(labelText: 'Number of iterations'),
                   keyboardType: TextInputType.number,
-                  initialValue: iterations.toString(),
+                  controller: numberOfIterationsController,
                 ),
               ),
             ],
@@ -265,7 +294,7 @@ class _ProblemParams extends StatelessWidget {
                 child: TextFormField(
                   decoration: const InputDecoration(labelText: 'Alpha'),
                   keyboardType: TextInputType.number,
-                  initialValue: alpha.toString(),
+                  controller: alphaController,
                 ),
               ),
               const SizedBox(
@@ -275,7 +304,7 @@ class _ProblemParams extends StatelessWidget {
                 child: TextFormField(
                   decoration: const InputDecoration(labelText: 'Beta'),
                   keyboardType: TextInputType.number,
-                  initialValue: beta.toString(),
+                  controller: betaController,
                 ),
               ),
               const SizedBox(
@@ -285,7 +314,7 @@ class _ProblemParams extends StatelessWidget {
                 child: TextFormField(
                   decoration: const InputDecoration(labelText: 'Rho'),
                   keyboardType: TextInputType.number,
-                  initialValue: rho.toString(),
+                  controller: rhoController,
                 ),
               ),
               const SizedBox(
@@ -295,14 +324,29 @@ class _ProblemParams extends StatelessWidget {
                 child: TextFormField(
                   decoration: const InputDecoration(labelText: 'q0'),
                   keyboardType: TextInputType.number,
-                  initialValue: q0.toString(),
+                  controller: q0Controller,
                 ),
               ),
             ],
           ),
           Padding(
             padding: const EdgeInsets.only(top: 10),
-            child: TextButton(onPressed: () {}, child: const Text("Solve")),
+            child: TextButton(
+                onPressed: () {
+                  Problem load = Parser.parseVariant(
+                    problemTextController.text,
+                    int.parse(numberOfCustomersController.text),
+                    int.parse(vehicleCapacityController.text),
+                    int.parse(numberOfAntsController.text),
+                    double.parse(betaController.text),
+                    double.parse(q0Controller.text),
+                    double.parse(alphaController.text),
+                    double.parse(rhoController.text),
+                    int.parse(numberOfIterationsController.text),
+                  );
+                  onSolveTap(load);
+                },
+                child: const Text("Solve")),
           ),
         ],
       ),

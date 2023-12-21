@@ -4,9 +4,18 @@ import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
 
 abstract class Parser {
-
-  static Problem parseVariant(String data, int numberOfCustomers) {
-    Problem problem = Problem();
+  static Problem parseVariant(
+      String data,
+      int numberOfCustomers,
+      int maxVehicleCapacity,
+      int numberOfAnts,
+      double beta,
+      double q0,
+      double alpha,
+      double rho,
+      int iteration) {
+    Problem problem = Problem(
+        maxVehicleCapacity, numberOfAnts, beta, q0, alpha, rho, iteration);
     data = data.replaceAll("      ", " ");
     data = data.replaceAll("     ", " ");
     data = data.replaceAll("    ", " ");
