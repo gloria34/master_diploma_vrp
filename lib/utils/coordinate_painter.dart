@@ -1,8 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:master_diploma_vrp/main.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
-import 'dart:math' as math;
 
 import 'package:master_diploma_vrp/aco/tour.dart';
 
@@ -74,8 +74,7 @@ class CoordinatePainter extends CustomPainter {
     if (answer?.isNotEmpty == true) {
       for (List<int> route in answer!.first.route) {
         final paint = Paint()
-          ..color = Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
-              .withOpacity(1.0)
+          ..color = randomColors[answer!.first.route.indexOf(route)]
           ..strokeWidth = 4;
         if (route.length > 1) {
           for (int i = 0; i < route.length - 1; i++) {

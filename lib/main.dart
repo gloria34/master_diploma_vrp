@@ -8,16 +8,18 @@ import 'package:master_diploma_vrp/model/problem.dart';
 import 'package:master_diploma_vrp/aco/tour.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
+import 'dart:math' as math;
 
 //initial problem details
 int vehicleCapacity = 200;
 int numberOfCustomers = 101;
 int ants = 101;
-int iterations = 1000;
+int iterations = 500;
 double alpha = 0.2;
 double beta = 0.2;
 double rho = 0.2;
 double q0 = 0.85;
+List<Color> randomColors = [];
 String initialProblem =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
     2      41.00      49.00      10.00     161.00     171.00      10.00
@@ -188,9 +190,17 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
 
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) {
+    _generateRandomColors();
     Problem load = Parser.parseVariant(initialProblem, numberOfCustomers,
         vehicleCapacity, ants, beta, q0, alpha, rho, iterations);
     _solveProblem(load);
+  }
+
+  void _generateRandomColors() {
+    for (int i = 0; i < 500; i++) {
+      randomColors.add(Color((math.Random().nextDouble() * 0xFFFFFF).toInt())
+          .withOpacity(1.0));
+    }
   }
 
   void _solveProblem(Problem problem) {
