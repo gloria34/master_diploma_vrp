@@ -10,15 +10,15 @@ import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 
 //initial problem details
-const vehicleCapacity = 200;
-const numberOfCustomers = 101;
-const ants = 40;
-const iterations = 300;
-const alpha = 0.2;
-const beta = 0.25;
-const rho = 0.2;
-const q0 = 0.85;
-const initialProblem =
+int vehicleCapacity = 200;
+int numberOfCustomers = 101;
+int ants = 101;
+int iterations = 1000;
+double alpha = 0.2;
+double beta = 0.2;
+double rho = 0.2;
+double q0 = 0.85;
+String initialProblem =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
     2      41.00      49.00      10.00     161.00     171.00      10.00
     3      35.00      17.00       7.00      50.00      60.00      10.00
@@ -344,6 +344,16 @@ class _ProblemParams extends StatelessWidget {
                     double.parse(rhoController.text),
                     int.parse(numberOfIterationsController.text),
                   );
+                  initialProblem = problemTextController.text;
+                  numberOfCustomers =
+                      int.parse(numberOfCustomersController.text);
+                  vehicleCapacity = int.parse(vehicleCapacityController.text);
+                  ants = int.parse(numberOfAntsController.text);
+                  beta = double.parse(betaController.text);
+                  q0 = double.parse(q0Controller.text);
+                  alpha = double.parse(alphaController.text);
+                  rho = double.parse(rhoController.text);
+                  iterations = int.parse(numberOfIterationsController.text);
                   onSolveTap(load);
                 },
                 child: const Text("Solve")),
