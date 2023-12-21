@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/aco/aco_variant.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
-import 'package:master_diploma_vrp/model/tour.dart';
+import 'package:master_diploma_vrp/aco/tour.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 
 //problem details
-const vehicleCapacity = 200.0;
+const vehicleCapacity = 200;
 const numberOfCustomers = 101;
 const data =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
@@ -115,16 +115,6 @@ const data =
   100      20.00      26.00       9.00      83.00      93.00      10.00
   101      18.00      18.00      17.00     185.00     195.00      10.00""";
 
-//ACO params
-const numberOfAnts = numberOfCustomers - 1;
-const evaporationRate = 0.5;
-const pheromoneImportance = 1;
-const heuristicImportance = 1;
-const timeWindowsImportance = 1;
-const numberOfIterations = 100;
-const initialPheromoneValue = 0.1;
-const trailDepositCoefficient = 500;
-
 void main() {
   runApp(const MyApp());
 }
@@ -186,9 +176,9 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
                     answer: _solutions!,
                     time: time,
                   ),
-                  const SizedBox(
-                    height: 80,
-                  )
+                const SizedBox(
+                  height: 80,
+                )
               ],
             ),
           ),
@@ -240,7 +230,7 @@ class _AnswerInfo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text("Number of vehicles = ${answer.pareto_sols.first.route.length}"),
-        Text("Distance = ${answer.pareto_sols.first.J}"),
+        Text("Distance = ${answer.pareto_sols.first.totalDistance}"),
         Text("Time = $time")
       ],
     );

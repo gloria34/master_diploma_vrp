@@ -1,10 +1,10 @@
 import 'dart:developer' as d;
 import 'dart:math';
 
-import 'package:master_diploma_vrp/aco/nearest_neighbor_heuristic.dart';
-import 'package:master_diploma_vrp/aco/pareto_check.dart';
+import 'package:master_diploma_vrp/aco/heuristic.dart';
+import 'package:master_diploma_vrp/aco/check_route.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
-import 'package:master_diploma_vrp/model/tour.dart';
+import 'package:master_diploma_vrp/aco/tour.dart';
 
 class ACOVariant {
   List<Tour> pareto_sols = [];
@@ -16,10 +16,11 @@ class ACOVariant {
     List<List<double>> tau = []; //tau = pheromone matrix
 
     //Initialize solution and pheromone
-    NearestNeighborHeuristic ini_sol = new NearestNeighborHeuristic();
-    ini_sol = NearestNeighborHeuristic.nnh(
+    Heuristic ini_sol = new Heuristic();
+    ini_sol = Heuristic.nearestNeighborHeuristic(
         problem); //initial solution which is perfectly meet constrains
-    double tau_0 = 1 / (ini_sol.n * ini_sol.J_nnh); //initial pheromone
+    double tau_0 = 1 /
+        (ini_sol.numberOfCustomers * ini_sol.totalDistance); //initial pheromone
     for (int i = 0; i < problem.customer.length; i++) {
       List<double> phe_mat = [];
       for (int j = 0; j < problem.customer.length; j++) {
@@ -42,15 +43,15 @@ class ACOVariant {
       int e_s = end - start;
       if (e_s > problem.time * 1000) return aco;
 
-      for (int i = 1; i <= problem.ant_num; i++) {
+      for (int i = 1; i <= problem.numberOfAnts; i++) {
         Tour solution = Tour(); //ant i create a solution
         solution = Tour.tour(problem, tau, fix_tau_0);
         if (aco.pareto_sols.length == 0) aco.pareto_sols.add(solution);
-        if (ParetoCheck.check(aco.pareto_sols, solution) == true &&
+        if (CheckRoute.check(aco.pareto_sols, solution) == true &&
             aco.pareto_sols.length != 0) {
           //the case where the solution is in pareto solutions
           List<Tour> dominated_sols_ind =
-              ParetoCheck.rm_ind(aco.pareto_sols, solution);
+              CheckRoute.getDominatedSolutions(aco.pareto_sols, solution);
           for (int j = 0; j < dominated_sols_ind.length; j++)
             aco.pareto_sols.remove(dominated_sols_ind[
                 j]); //remove dominated solutions from aco.pareto_sols
@@ -61,8 +62,8 @@ class ACOVariant {
       double P_n = 0.0;
       double P_J = 0.0;
       for (int i = 0; i < aco.pareto_sols.length; i++) {
-        P_n = P_n + aco.pareto_sols[i].n;
-        P_J = P_J + aco.pareto_sols[i].J;
+        P_n = P_n + aco.pareto_sols[i].numberOfCustomers;
+        P_J = P_J + aco.pareto_sols[i].totalDistance;
       }
       P_n =
           P_n / aco.pareto_sols.length; //the average value in pareto solutions
@@ -114,12 +115,15 @@ class ACOVariant {
       }
 
       //tracking minimum vehicle number, total time and total distance
-      int min_vehinum = aco.pareto_sols[0].n - (problem.customer.length - 1);
-      double min_distance = aco.pareto_sols[0].J;
+      int min_vehinum =
+          aco.pareto_sols[0].numberOfCustomers - (problem.customer.length - 1);
+      double min_distance = aco.pareto_sols[0].totalDistance;
       for (int i = 1; i < aco.pareto_sols.length; i++) {
         min_vehinum = min(
-            min_vehinum, aco.pareto_sols[i].n - (problem.customer.length - 1));
-        min_distance = min(min_distance, aco.pareto_sols[i].J);
+            min_vehinum,
+            aco.pareto_sols[i].numberOfCustomers -
+                (problem.customer.length - 1));
+        min_distance = min(min_distance, aco.pareto_sols[i].totalDistance);
       }
 
       aco.min_vehinum_tracker.add(min_vehinum);

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'dart:math' as math;
 
-import 'package:master_diploma_vrp/model/tour.dart';
+import 'package:master_diploma_vrp/aco/tour.dart';
 
 class CoordinatePainter extends CustomPainter {
   final List<PointVariant> points;
