@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
-import 'package:master_diploma_vrp/aco/aco_variant.dart';
+import 'package:master_diploma_vrp/aco/aco.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
 import 'package:master_diploma_vrp/aco/tour.dart';
@@ -144,7 +144,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   List<PointVariant> _points = [];
-  ACOVariant? _solutions;
+  ACO? _solutions;
   int time = 0;
   @override
   Widget build(BuildContext context) {
@@ -169,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
                 for (PointVariant point in _points) Text(point.toString()),
                 _CoordinatePlane(
                   points: _points,
-                  answer: _solutions?.pareto_sols,
+                  answer: _solutions?.solutions,
                 ),
                 if (_solutions != null)
                   _AnswerInfo(
@@ -192,8 +192,8 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
       _points = load.customer;
     });
     int start = DateTime.now().millisecondsSinceEpoch;
-    ACOVariant solutions = ACOVariant();
-    solutions = ACOVariant.ant_main(load, start);
+    ACO solutions = ACO();
+    solutions = ACO.aco(load, start);
     setState(() {
       _solutions = solutions;
     });
@@ -220,7 +220,7 @@ class _CoordinatePlane extends StatelessWidget {
 }
 
 class _AnswerInfo extends StatelessWidget {
-  final ACOVariant answer;
+  final ACO answer;
   final int time;
 
   const _AnswerInfo({required this.answer, required this.time});
@@ -229,8 +229,8 @@ class _AnswerInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Number of vehicles = ${answer.pareto_sols.first.route.length}"),
-        Text("Distance = ${answer.pareto_sols.first.totalDistance}"),
+        Text("Number of vehicles = ${answer.solutions.first.route.length}"),
+        Text("Distance = ${answer.solutions.first.totalDistance}"),
         Text("Time = $time")
       ],
     );
