@@ -12,7 +12,13 @@ import 'package:master_diploma_vrp/utils/parser.dart';
 //problem details
 const vehicleCapacity = 200;
 const numberOfCustomers = 101;
-const data =
+const ants = 40;
+const iterations = 300;
+const alpha = 0.2;
+const beta = 0.25;
+const rho = 0.2;
+const q0 = 0.85;
+const initialProblem =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
     2      41.00      49.00      10.00     161.00     171.00      10.00
     3      35.00      17.00       7.00      50.00      60.00      10.00
@@ -159,14 +165,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "VEHICLE CAPACITY: $vehicleCapacity",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                for (PointVariant point in _points) Text(point.toString()),
+                _ProblemParams(),
                 _CoordinatePlane(
                   points: _points,
                   answer: _solutions?.solutions,
@@ -187,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
 
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) {
-    Problem load = Parser.parseVariant(data, numberOfCustomers);
+    Problem load = Parser.parseVariant(initialProblem, numberOfCustomers);
     setState(() {
       _points = load.customer;
     });
@@ -199,6 +198,115 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
     });
     int end = DateTime.now().millisecondsSinceEpoch;
     time = end - start;
+  }
+}
+
+class _ProblemParams extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          TextFormField(
+            decoration: const InputDecoration(labelText: 'Problem text'),
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            initialValue: initialProblem,
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  decoration:
+                      const InputDecoration(labelText: 'Number of customers'),
+                  keyboardType: TextInputType.number,
+                  initialValue: numberOfCustomers.toString(),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  decoration:
+                      const InputDecoration(labelText: 'Vehicle capacity'),
+                  keyboardType: TextInputType.number,
+                  initialValue: vehicleCapacity.toString(),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  decoration:
+                      const InputDecoration(labelText: 'Number of ants'),
+                  keyboardType: TextInputType.number,
+                  initialValue: ants.toString(),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  decoration:
+                      const InputDecoration(labelText: 'Number of iterations'),
+                  keyboardType: TextInputType.number,
+                  initialValue: iterations.toString(),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  decoration: const InputDecoration(labelText: 'Alpha'),
+                  keyboardType: TextInputType.number,
+                  initialValue: alpha.toString(),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  decoration: const InputDecoration(labelText: 'Beta'),
+                  keyboardType: TextInputType.number,
+                  initialValue: beta.toString(),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  decoration: const InputDecoration(labelText: 'Rho'),
+                  keyboardType: TextInputType.number,
+                  initialValue: rho.toString(),
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  decoration: const InputDecoration(labelText: 'q0'),
+                  keyboardType: TextInputType.number,
+                  initialValue: q0.toString(),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: TextButton(onPressed: () {}, child: const Text("Solve")),
+          ),
+        ],
+      ),
+    );
   }
 }
 
