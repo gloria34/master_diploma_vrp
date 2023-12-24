@@ -14,12 +14,12 @@ import 'dart:math' as math;
 int vehicleCapacity = 200;
 int numberOfCustomers = 101;
 int ants = 101;
-int iterations = 100;
+int iterations = 1000;
 double alpha = 2;
 double beta = 3;
 double rho = 0.2;
 double q0 = 0.85;
-double upsilon = 1;
+double upsilon = 0.5;
 double xi = 0.1; //initial pheromone
 double delta = 0.1; //pheromone evaporation
 List<Color> randomColors = [];

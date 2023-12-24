@@ -13,26 +13,28 @@ class ACOVariant {
   //d - matrix of distances
   //start is depot [0][0]
   AntColonyResult antColony(List<List<double>> d) {
-    //initialize pheromone matrix
-    List<List<double>> pr = [];
-    for (int i = 0; i < customers.length; i++) {
-      pr.add([]);
-      for (int j = 0; j < customers.length; j++) {
-        pr[i].add(xi);
-      }
-    }
     double bestLength = 9999999999;
     List<List<int>> bestPath = [];
-    for (int i = 0; i < ants; i++) {
-      final result = antActivity(d, pr);
-      if (result.length < bestLength) {
-        bestLength = result.length;
-        bestPath = result.l;
+    for (int it = 0; it < iterations; it++) {
+      //initialize pheromone matrix
+      List<List<double>> pr = [];
+      for (int i = 0; i < customers.length; i++) {
+        pr.add([]);
+        for (int j = 0; j < customers.length; j++) {
+          pr[i].add(xi);
+        }
       }
-      //evaporation
-      for (int i = 0; i < pr.length; i++) {
-        for (int j = 0; j < pr[i].length; j++) {
-          pr[i][j] *= (1 - delta);
+      for (int i = 0; i < ants; i++) {
+        final result = antActivity(d, pr);
+        if (result.length < bestLength) {
+          bestLength = result.length;
+          bestPath = result.l;
+        }
+        //evaporation
+        for (int i = 0; i < pr.length; i++) {
+          for (int j = 0; j < pr[i].length; j++) {
+            pr[i][j] = max(0.000001, pr[i][j] * (1 - delta));
+          }
         }
       }
     }
@@ -117,7 +119,7 @@ class ACOVariant {
     prNew.addAll(pr);
     for (int i = 0; i < l.length; i++) {
       for (int j = 0; j < l[i].length - 1; j++) {
-        prNew[l[i][j]][l[i][j + 1]] += upsilon / (k * length);
+        prNew[l[i][j]][l[i][j + 1]] += max(0.000001, upsilon / (k * length));
       }
     }
     return AntActivityResult(l: l, pr: prNew, demand: demand, length: length);
