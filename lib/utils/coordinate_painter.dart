@@ -4,13 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/main.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 
-import 'package:master_diploma_vrp/aco/tour.dart';
-
 class CoordinatePainter extends CustomPainter {
   final List<PointVariant> points;
   final int zoomX;
   final int zoomY;
-  List<Tour>? answer;
+  List<List<int>>? answer;
 
   CoordinatePainter(
       {super.repaint,
@@ -72,9 +70,9 @@ class CoordinatePainter extends CustomPainter {
 
   void _drawLines(Canvas canvas, Size size) {
     if (answer?.isNotEmpty == true) {
-      for (List<int> route in answer!.first.route) {
+      for (List<int> route in answer!) {
         final paint = Paint()
-          ..color = randomColors[answer!.first.route.indexOf(route)]
+          ..color = randomColors[answer!.indexOf(route)]
           ..strokeWidth = 4;
         if (route.length > 1) {
           for (int i = 0; i < route.length - 1; i++) {

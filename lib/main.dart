@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
-import 'package:master_diploma_vrp/aco/aco.dart';
+import 'package:master_diploma_vrp/aco/aco_variant.dart';
+import 'package:master_diploma_vrp/model/ant_colony_result.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
-import 'package:master_diploma_vrp/aco/tour.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 import 'dart:math' as math;
@@ -14,11 +14,14 @@ import 'dart:math' as math;
 int vehicleCapacity = 200;
 int numberOfCustomers = 101;
 int ants = 101;
-int iterations = 500;
+int iterations = 100;
 double alpha = 2;
 double beta = 3;
 double rho = 0.2;
 double q0 = 0.85;
+double upsilon = 1;
+double xi = 0.1; //initial pheromone
+double delta = 0.1; //pheromone evaporation
 List<Color> randomColors = [];
 String initialProblem =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
@@ -152,7 +155,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   List<PointVariant> _points = [];
-  ACO? _solutions;
+  AntColonyResult? _solution;
   int time = 0;
   @override
   Widget build(BuildContext context) {
@@ -172,11 +175,11 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
                 }),
                 _CoordinatePlane(
                   points: _points,
-                  answer: _solutions?.solutions,
+                  answer: _solution,
                 ),
-                if (_solutions != null)
+                if (_solution != null)
                   _AnswerInfo(
-                    answer: _solutions!,
+                    answer: _solution!,
                     time: time,
                   ),
                 const SizedBox(
@@ -208,10 +211,10 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
       _points = problem.customer;
     });
     int start = DateTime.now().millisecondsSinceEpoch;
-    ACO solutions = ACO();
-    solutions = ACO.aco(problem, start);
+    final solution =
+        ACOVariant(customers: problem.customer).antColony(problem.dist);
     setState(() {
-      _solutions = solutions;
+      _solution = solution;
     });
     int end = DateTime.now().millisecondsSinceEpoch;
     time = end - start;
@@ -376,7 +379,7 @@ class _ProblemParams extends StatelessWidget {
 
 class _CoordinatePlane extends StatelessWidget {
   final List<PointVariant> points;
-  final List<Tour>? answer;
+  final AntColonyResult? answer;
 
   const _CoordinatePlane({required this.points, required this.answer});
   @override
@@ -385,14 +388,14 @@ class _CoordinatePlane extends StatelessWidget {
       child: CustomPaint(
         size: Size(MediaQuery.of(context).size.width - 40, 600),
         painter: CoordinatePainter(
-            points: points, zoomX: 12, zoomY: 7, answer: answer),
+            points: points, zoomX: 12, zoomY: 7, answer: answer?.bestPath),
       ),
     );
   }
 }
 
 class _AnswerInfo extends StatelessWidget {
-  final ACO answer;
+  final AntColonyResult answer;
   final int time;
 
   const _AnswerInfo({required this.answer, required this.time});
@@ -401,8 +404,8 @@ class _AnswerInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Number of vehicles = ${answer.solutions.first.route.length}"),
-        Text("Distance = ${answer.solutions.first.totalDistance}"),
+        Text("Number of vehicles = ${answer.bestPath.length}"),
+        Text("Distance = ${answer.bestLength}"),
         Text("Time = $time")
       ],
     );
