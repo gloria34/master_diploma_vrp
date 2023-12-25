@@ -4,34 +4,26 @@ import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
 
 abstract class Parser {
-  static Problem parseVariant(
-      String data,
-      int numberOfCustomers,
-      int maxVehicleCapacity,
-      int numberOfAnts,
-      double beta,
-      double q0,
-      double alpha,
-      double rho,
-      int iteration) {
-    Problem problem = Problem(
-        maxVehicleCapacity, numberOfAnts, beta, q0, alpha, rho, iteration);
+  static Problem parseVariant(String data, int numberOfCustomers) {
+    Problem problem = Problem();
     data = data.replaceAll("      ", " ");
     data = data.replaceAll("     ", " ");
     data = data.replaceAll("    ", " ");
     data = data.replaceAll("   ", " ");
     data = data.replaceAll("  ", " ");
+    data = data.replaceAll("\n", "");
     for (var i = 0; i < numberOfCustomers; i++) {
+        final split = data.split(" ").where((s) => s.isNotEmpty).toList();
       PointVariant point = PointVariant(
-          number: int.parse(data.split(" ")[0 + i * 7]),
+          number: int.parse(split[0 + i * 7]),
           position: [
-            double.parse(data.split(" ")[1 + i * 7]),
-            double.parse(data.split(" ")[2 + i * 7])
+            double.parse(split[1 + i * 7]),
+            double.parse(split[2 + i * 7])
           ],
-          demand: double.parse(data.split(" ")[3 + i * 7]),
-          fromTime: double.parse(data.split(" ")[4 + i * 7]),
-          dueTime: double.parse(data.split(" ")[5 + i * 7]),
-          serviceTime: double.parse(data.split(" ")[6 + i * 7]));
+          demand: double.parse(split[3 + i * 7]),
+          fromTime: double.parse(split[4 + i * 7]),
+          dueTime: double.parse(split[5 + i * 7]),
+          serviceTime: double.parse(split[6 + i * 7]));
       problem.customer.add(point);
     }
     for (int i = 0; i < problem.customer.length; i++) {

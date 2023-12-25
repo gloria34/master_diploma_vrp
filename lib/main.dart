@@ -17,10 +17,8 @@ int ants = 101;
 int iterations = 1000;
 double alpha = 2;
 double beta = 3;
-double rho = 0.2;
-double q0 = 0.85;
-double upsilon = 0.5;
-double xi = 0.1; //initial pheromone
+double upsilon = 1600;
+double xi = 0.001; //initial pheromone
 double delta = 0.1; //pheromone evaporation
 List<Color> randomColors = [];
 String initialProblem =
@@ -194,8 +192,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   @override
   FutureOr<void> afterFirstLayout(BuildContext context) {
     _generateRandomColors();
-    Problem load = Parser.parseVariant(initialProblem, numberOfCustomers,
-        vehicleCapacity, ants, beta, q0, alpha, rho, iterations);
+    Problem load = Parser.parseVariant(initialProblem, numberOfCustomers);
     _solveProblem(load);
   }
 
@@ -236,10 +233,12 @@ class _ProblemParams extends StatelessWidget {
       TextEditingController(text: alpha.toString());
   final TextEditingController betaController =
       TextEditingController(text: beta.toString());
-  final TextEditingController rhoController =
-      TextEditingController(text: rho.toString());
-  final TextEditingController q0Controller =
-      TextEditingController(text: q0.toString());
+  final TextEditingController xiController =
+      TextEditingController(text: xi.toString());
+  final TextEditingController upsilonController =
+      TextEditingController(text: upsilon.toString());
+  final TextEditingController deltaController =
+      TextEditingController(text: delta.toString());
   final Function(Problem) onSolveTap;
 
   _ProblemParams({required this.onSolveTap});
@@ -325,9 +324,9 @@ class _ProblemParams extends StatelessWidget {
               ),
               Expanded(
                 child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Rho'),
+                  decoration: const InputDecoration(labelText: 'Xi'),
                   keyboardType: TextInputType.number,
-                  controller: rhoController,
+                  controller: xiController,
                 ),
               ),
               const SizedBox(
@@ -335,9 +334,19 @@ class _ProblemParams extends StatelessWidget {
               ),
               Expanded(
                 child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'q0'),
+                  decoration: const InputDecoration(labelText: 'Upsilon'),
                   keyboardType: TextInputType.number,
-                  controller: q0Controller,
+                  controller: upsilonController,
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  decoration: const InputDecoration(labelText: 'Delta'),
+                  keyboardType: TextInputType.number,
+                  controller: deltaController,
                 ),
               ),
             ],
@@ -346,27 +355,19 @@ class _ProblemParams extends StatelessWidget {
             padding: const EdgeInsets.only(top: 10),
             child: TextButton(
                 onPressed: () {
-                  Problem load = Parser.parseVariant(
-                    problemTextController.text,
-                    int.parse(numberOfCustomersController.text),
-                    int.parse(vehicleCapacityController.text),
-                    int.parse(numberOfAntsController.text),
-                    double.parse(betaController.text),
-                    double.parse(q0Controller.text),
-                    double.parse(alphaController.text),
-                    double.parse(rhoController.text),
-                    int.parse(numberOfIterationsController.text),
-                  );
+                  Problem load = Parser.parseVariant(problemTextController.text,
+                      int.parse(numberOfCustomersController.text));
                   initialProblem = problemTextController.text;
                   numberOfCustomers =
                       int.parse(numberOfCustomersController.text);
                   vehicleCapacity = int.parse(vehicleCapacityController.text);
                   ants = int.parse(numberOfAntsController.text);
                   beta = double.parse(betaController.text);
-                  q0 = double.parse(q0Controller.text);
+                  upsilon = double.parse(upsilonController.text);
                   alpha = double.parse(alphaController.text);
-                  rho = double.parse(rhoController.text);
+                  xi = double.parse(xiController.text);
                   iterations = int.parse(numberOfIterationsController.text);
+                  delta = double.parse(deltaController.text);
                   onSolveTap(load);
                 },
                 child: const Text("Solve")),
