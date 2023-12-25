@@ -378,19 +378,49 @@ class _ProblemParams extends StatelessWidget {
   }
 }
 
-class _CoordinatePlane extends StatelessWidget {
+class _CoordinatePlane extends StatefulWidget {
   final List<PointVariant> points;
   final AntColonyResult? answer;
 
   const _CoordinatePlane({required this.points, required this.answer});
+
+  @override
+  State<StatefulWidget> createState() {
+    return _CoordinatePlaneState();
+  }
+}
+
+class _CoordinatePlaneState extends State<_CoordinatePlane> {
+  bool _isLabelsVisible = false;
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: CustomPaint(
-        size: Size(MediaQuery.of(context).size.width - 40, 600),
-        painter: CoordinatePainter(
-            points: points, zoomX: 12, zoomY: 7, answer: answer?.bestPath),
-      ),
+    return Column(
+      children: [
+        Center(
+          child: CustomPaint(
+            size: Size(MediaQuery.of(context).size.width - 40, 600),
+            painter: CoordinatePainter(
+                points: widget.points,
+                zoomX: 12,
+                zoomY: 7,
+                answer: widget.answer?.bestPath,
+                isLabelsVisible: _isLabelsVisible),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Show labels"),
+            Switch(
+                value: _isLabelsVisible,
+                onChanged: (value) {
+                  setState(() {
+                    _isLabelsVisible = value;
+                  });
+                })
+          ],
+        )
+      ],
     );
   }
 }

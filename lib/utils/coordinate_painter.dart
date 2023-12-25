@@ -8,6 +8,7 @@ class CoordinatePainter extends CustomPainter {
   final List<PointVariant> points;
   final int zoomX;
   final int zoomY;
+  final bool isLabelsVisible;
   List<List<int>>? answer;
 
   CoordinatePainter(
@@ -15,7 +16,8 @@ class CoordinatePainter extends CustomPainter {
       required this.points,
       required this.zoomX,
       required this.zoomY,
-      required this.answer});
+      required this.answer,
+      required this.isLabelsVisible});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -25,19 +27,21 @@ class CoordinatePainter extends CustomPainter {
       double dx = point.position[0] * zoomX;
       double dy = size.height - (point.position[1] * zoomY);
       offsets.add(Offset(dx, dy));
-      // Draw legend
-      final textSpan = TextSpan(
-        text: "#${point.number} (${point.position[0]}; ${point.position[1]})",
-        style: const TextStyle(fontSize: 16.0),
-      );
-      final textPainter = TextPainter(
-        text: textSpan,
-        textDirection: TextDirection.ltr,
-      );
-      textPainter.layout();
-      final textX = dx - textPainter.width / 2;
-      final textY = dy - textPainter.height - 5;
-      textPainter.paint(canvas, Offset(textX, textY));
+      if (isLabelsVisible) {
+        // Draw legend
+        final textSpan = TextSpan(
+          text: "#${point.number} (${point.fromTime}; ${point.dueTime})",
+          style: const TextStyle(fontSize: 12.0, color: Colors.black),
+        );
+        final textPainter = TextPainter(
+          text: textSpan,
+          textDirection: TextDirection.ltr,
+        );
+        textPainter.layout();
+        final textX = dx - textPainter.width / 2;
+        final textY = dy - textPainter.height - 5;
+        textPainter.paint(canvas, Offset(textX, textY));
+      }
     }
     if (answer != null) {
       _drawLines(canvas, size);
