@@ -105,6 +105,8 @@ class ACOVariant {
         }
       }
     }
+    //go to depot   
+    l[l.length - 1].add(0);
     //calculate length
     double length = 0.0;
     int k = 0;
