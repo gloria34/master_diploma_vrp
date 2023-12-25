@@ -18,7 +18,7 @@ int iterations = 1000;
 double alpha = 2;
 double beta = 3;
 double upsilon = 1600;
-double xi = 0.001; //initial pheromone
+double xi = 0.1; //initial pheromone
 double delta = 0.1; //pheromone evaporation
 List<Color> randomColors = [];
 String initialProblem =
@@ -154,6 +154,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   List<PointVariant> _points = [];
   AntColonyResult? _solution;
+  List<AntColonyResult> _tenSolutions = [];
   int time = 0;
   @override
   Widget build(BuildContext context) {
@@ -168,9 +169,14 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _ProblemParams(onSolveTap: (problem) {
-                  _solveProblem(problem);
-                }),
+                _ProblemParams(
+                  onSolveTap: (problem) {
+                    _solveProblem(problem);
+                  },
+                  onGetTemSolutionsTap: (problem) {
+                    _getTenSolutions(problem);
+                  },
+                ),
                 _CoordinatePlane(
                   points: _points,
                   answer: _solution,
@@ -179,6 +185,10 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
                   _AnswerInfo(
                     answer: _solution!,
                     time: time,
+                  ),
+                if (_tenSolutions.isNotEmpty)
+                  _SolutionLogs(
+                    tenSolutions: _tenSolutions,
                   ),
                 const SizedBox(
                   height: 80,
@@ -216,6 +226,27 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
     int end = DateTime.now().millisecondsSinceEpoch;
     time = end - start;
   }
+
+  void _getTenSolutions(Problem problem) {
+    setState(() {
+      _points = problem.customer;
+      _tenSolutions.clear();
+    });
+    for (int i = 0; i < 10; i++) {
+      int start = DateTime.now().millisecondsSinceEpoch;
+      final solution =
+          ACOVariant(customers: problem.customer).antColony(problem.dist);
+      int end = DateTime.now().millisecondsSinceEpoch;
+      solution.time = end - start;
+      _tenSolutions.add(solution);
+    }
+    AntColonyResult shortest = _tenSolutions.reduce((current, next) =>
+        current.bestLength < next.bestLength ? current : next);
+    setState(() {
+      _solution = shortest;
+      time = shortest.time;
+    });
+  }
 }
 
 class _ProblemParams extends StatelessWidget {
@@ -240,8 +271,10 @@ class _ProblemParams extends StatelessWidget {
   final TextEditingController deltaController =
       TextEditingController(text: delta.toString());
   final Function(Problem) onSolveTap;
+  final Function(Problem) onGetTemSolutionsTap;
 
-  _ProblemParams({required this.onSolveTap});
+  _ProblemParams(
+      {required this.onSolveTap, required this.onGetTemSolutionsTap});
 
   @override
   Widget build(BuildContext context) {
@@ -353,28 +386,46 @@ class _ProblemParams extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(top: 10),
-            child: TextButton(
-                onPressed: () {
-                  Problem load = Parser.parseVariant(problemTextController.text,
-                      int.parse(numberOfCustomersController.text));
-                  initialProblem = problemTextController.text;
-                  numberOfCustomers =
-                      int.parse(numberOfCustomersController.text);
-                  vehicleCapacity = int.parse(vehicleCapacityController.text);
-                  ants = int.parse(numberOfAntsController.text);
-                  beta = double.parse(betaController.text);
-                  upsilon = double.parse(upsilonController.text);
-                  alpha = double.parse(alphaController.text);
-                  xi = double.parse(xiController.text);
-                  iterations = int.parse(numberOfIterationsController.text);
-                  delta = double.parse(deltaController.text);
-                  onSolveTap(load);
-                },
-                child: const Text("Solve")),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton(
+                    onPressed: () {
+                      Problem load = Parser.parseVariant(
+                          problemTextController.text,
+                          int.parse(numberOfCustomersController.text));
+                      _setProblemParams();
+                      onSolveTap(load);
+                    },
+                    child: const Text("Solve")),
+                TextButton(
+                    onPressed: () {
+                      Problem load = Parser.parseVariant(
+                          problemTextController.text,
+                          int.parse(numberOfCustomersController.text));
+                      _setProblemParams();
+                      onGetTemSolutionsTap(load);
+                    },
+                    child: const Text("Get 10 solutions")),
+              ],
+            ),
           ),
         ],
       ),
     );
+  }
+
+  void _setProblemParams() {
+    initialProblem = problemTextController.text;
+    numberOfCustomers = int.parse(numberOfCustomersController.text);
+    vehicleCapacity = int.parse(vehicleCapacityController.text);
+    ants = int.parse(numberOfAntsController.text);
+    beta = double.parse(betaController.text);
+    upsilon = double.parse(upsilonController.text);
+    alpha = double.parse(alphaController.text);
+    xi = double.parse(xiController.text);
+    iterations = int.parse(numberOfIterationsController.text);
+    delta = double.parse(deltaController.text);
   }
 }
 
@@ -392,8 +443,10 @@ class _CoordinatePlane extends StatefulWidget {
 
 class _CoordinatePlaneState extends State<_CoordinatePlane> {
   bool _isLabelsVisible = false;
-  final TextEditingController _zoomXController = TextEditingController(text: "12");
-  final TextEditingController _zoomYController = TextEditingController(text: "7");
+  final TextEditingController _zoomXController =
+      TextEditingController(text: "12");
+  final TextEditingController _zoomYController =
+      TextEditingController(text: "7");
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -470,10 +523,34 @@ class _AnswerInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Number of vehicles = ${answer.bestPath.length}"),
-        Text("Distance = ${answer.bestLength}"),
-        Text("Time = $time")
+        SelectableText("Number of vehicles = ${answer.bestPath.length}"),
+        SelectableText("Distance = ${answer.bestLength}"),
+        SelectableText("Time = $time")
       ],
     );
+  }
+}
+
+class _SolutionLogs extends StatelessWidget {
+  final List<AntColonyResult> tenSolutions;
+
+  const _SolutionLogs({required this.tenSolutions});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        SelectableText(_getTenSolutionsString()),
+      ],
+    );
+  }
+
+  String _getTenSolutionsString() {
+    String result = "";
+    for (final solution in tenSolutions) {
+      result +=
+          "${solution.bestLength}\t${solution.bestPath.length}\t${solution.time}\n";
+    }
+    return result;
   }
 }

@@ -96,6 +96,7 @@ class ACOVariant {
           if (sum >= rnd) {
             currentTime += max(customers[cur].fromTime,
                 currentTime + d[cur][candidateList[i]]);
+            currentTime += customers[candidateList[i]].serviceTime;
             cur = candidateList[i];
             l[l.length - 1].add(cur);
             unservedCustomers.remove(cur);
@@ -105,7 +106,7 @@ class ACOVariant {
         }
       }
     }
-    //go to depot   
+    //go to depot
     l[l.length - 1].add(0);
     //calculate length
     double length = 0.0;
