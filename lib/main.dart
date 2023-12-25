@@ -392,6 +392,8 @@ class _CoordinatePlane extends StatefulWidget {
 
 class _CoordinatePlaneState extends State<_CoordinatePlane> {
   bool _isLabelsVisible = false;
+  final TextEditingController _zoomXController = TextEditingController(text: "12");
+  final TextEditingController _zoomYController = TextEditingController(text: "7");
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -401,24 +403,57 @@ class _CoordinatePlaneState extends State<_CoordinatePlane> {
             size: Size(MediaQuery.of(context).size.width - 40, 600),
             painter: CoordinatePainter(
                 points: widget.points,
-                zoomX: 12,
-                zoomY: 7,
+                zoomX: _zoomXController.text.isNotEmpty
+                    ? int.parse(_zoomXController.text)
+                    : 12,
+                zoomY: _zoomYController.text.isNotEmpty
+                    ? int.parse(_zoomYController.text)
+                    : 7,
                 answer: widget.answer?.bestPath,
                 isLabelsVisible: _isLabelsVisible),
           ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text("Show labels"),
-            Switch(
-                value: _isLabelsVisible,
-                onChanged: (value) {
-                  setState(() {
-                    _isLabelsVisible = value;
-                  });
-                })
-          ],
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Show labels"),
+              Switch(
+                  value: _isLabelsVisible,
+                  onChanged: (value) {
+                    setState(() {
+                      _isLabelsVisible = value;
+                    });
+                  }),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  decoration: const InputDecoration(labelText: 'Zoom X'),
+                  keyboardType: TextInputType.number,
+                  controller: _zoomXController,
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
+                  decoration: const InputDecoration(labelText: 'Zoom Y'),
+                  keyboardType: TextInputType.number,
+                  controller: _zoomYController,
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                ),
+              ),
+            ],
+          ),
         )
       ],
     );
