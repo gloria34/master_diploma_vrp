@@ -17,6 +17,7 @@ int ants = 101;
 int iterations = 1000;
 double alpha = 2;
 double beta = 3;
+double gamma = 2; //time windows influence factor
 double upsilon = 1600;
 double xi = 0.1; //initial pheromone
 double delta = 0.1; //pheromone evaporation
@@ -264,6 +265,8 @@ class _ProblemParams extends StatelessWidget {
       TextEditingController(text: alpha.toString());
   final TextEditingController betaController =
       TextEditingController(text: beta.toString());
+  final TextEditingController gammaController =
+      TextEditingController(text: gamma.toString());
   final TextEditingController xiController =
       TextEditingController(text: xi.toString());
   final TextEditingController upsilonController =
@@ -357,6 +360,16 @@ class _ProblemParams extends StatelessWidget {
               ),
               Expanded(
                 child: TextFormField(
+                  decoration: const InputDecoration(labelText: 'Gamma'),
+                  keyboardType: TextInputType.number,
+                  controller: gammaController,
+                ),
+              ),
+              const SizedBox(
+                width: 10,
+              ),
+              Expanded(
+                child: TextFormField(
                   decoration: const InputDecoration(labelText: 'Xi'),
                   keyboardType: TextInputType.number,
                   controller: xiController,
@@ -426,6 +439,7 @@ class _ProblemParams extends StatelessWidget {
     xi = double.parse(xiController.text);
     iterations = int.parse(numberOfIterationsController.text);
     delta = double.parse(deltaController.text);
+    gamma = double.parse(gammaController.text);
   }
 }
 

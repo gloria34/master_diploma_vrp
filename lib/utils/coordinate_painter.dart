@@ -23,6 +23,9 @@ class CoordinatePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     _drawAxis(canvas, size);
     final List<Offset> offsets = [];
+    if (answer != null) {
+      _drawLines(canvas, size);
+    }
     for (PointVariant point in points) {
       double dx = point.position[0] * zoomX;
       double dy = size.height - (point.position[1] * zoomY);
@@ -42,9 +45,6 @@ class CoordinatePainter extends CustomPainter {
         final textY = dy - textPainter.height - 5;
         textPainter.paint(canvas, Offset(textX, textY));
       }
-    }
-    if (answer != null) {
-      _drawLines(canvas, size);
     }
     _drawPoints(canvas, offsets);
   }
