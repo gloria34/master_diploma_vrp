@@ -81,24 +81,20 @@ class ACOVariant {
         List<double> probabilities = [];
         double probabilityDenominator = 0.0;
         for (int i = 0; i < candidateList.length; i++) {
-          // final t = customers[candidateList[i]].dueTime -
-          //     currentTime +
-          //     d[cur][candidateList[i]];
+          final t = customers[candidateList[i]].dueTime -
+              currentTime +
+              d[cur][candidateList[i]];
           probabilityDenominator += pow(pr[cur][candidateList[i]], alpha) *
-                  pow(1 / d[cur][candidateList[i]],
-                      beta) /*
-              pow(1 / t, gamma)*/
-              ;
+              pow(1 / d[cur][candidateList[i]], beta) *
+              pow(1 / t, gamma);
         }
         for (int i = 0; i < candidateList.length; i++) {
-          // final t = customers[candidateList[i]].dueTime -
-          //     currentTime +
-          //     d[cur][candidateList[i]];
+          final t = customers[candidateList[i]].dueTime -
+              currentTime +
+              d[cur][candidateList[i]];
           double probabilityNumerator = (pow(pr[cur][candidateList[i]], alpha) *
-                  pow(1 / d[cur][candidateList[i]],
-                      beta) /*
-                  pow(1 / t, gamma)*/
-              )
+                  pow(1 / d[cur][candidateList[i]], beta) *
+                  pow(1 / t, gamma))
               .toDouble();
           probabilities.add(probabilityNumerator / probabilityDenominator);
         }
