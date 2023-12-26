@@ -123,9 +123,11 @@ class ACOVariant {
     l[l.length - 1].add(0);
     //calculate length
     double length = 0.0;
+    int k = 0;
     for (int i = 0; i < l.length; i++) {
       for (int j = 0; j < l[i].length - 1; j++) {
         length += d[l[i][j]][l[i][j + 1]];
+        k++;
       }
     }
     //update pheromone
@@ -133,7 +135,7 @@ class ACOVariant {
     prNew.addAll(pr);
     for (int i = 0; i < l.length; i++) {
       for (int j = 0; j < l[i].length - 1; j++) {
-        prNew[l[i][j]][l[i][j + 1]] += upsilon / length;
+        prNew[l[i][j]][l[i][j + 1]] += upsilon / (k * length);
       }
     }
     return AntActivityResult(l: l, pr: prNew, demand: demand, length: length);
