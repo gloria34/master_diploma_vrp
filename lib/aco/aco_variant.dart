@@ -107,7 +107,7 @@ class ACOVariant {
         for (int i = 0; i < probabilities.length; i++) {
           sum += probabilities[i];
           if (sum >= rnd) {
-            currentTime += max(customers[candidateList[i]].fromTime,
+            currentTime = max(customers[candidateList[i]].fromTime,
                 currentTime + d[cur][candidateList[i]]);
             currentTime += customers[candidateList[i]].serviceTime;
             cur = candidateList[i];
