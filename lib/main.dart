@@ -22,6 +22,7 @@ double upsilon = 1600;
 double xi = 0.1; //initial pheromone
 double delta = 0.1; //pheromone evaporation
 List<Color> randomColors = [];
+double averageDistance = 0;
 String initialProblem =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
     2      41.00      49.00      10.00     161.00     171.00      10.00

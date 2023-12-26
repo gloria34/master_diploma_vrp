@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:master_diploma_vrp/main.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
 
@@ -13,7 +14,7 @@ abstract class Parser {
     data = data.replaceAll("  ", " ");
     data = data.replaceAll("\n", "");
     for (var i = 0; i < numberOfCustomers; i++) {
-        final split = data.split(" ").where((s) => s.isNotEmpty).toList();
+      final split = data.split(" ").where((s) => s.isNotEmpty).toList();
       PointVariant point = PointVariant(
           number: int.parse(split[0 + i * 7]),
           position: [
@@ -33,6 +34,7 @@ abstract class Parser {
       }
       problem.dist.add(dist_);
     }
+    double sum = 0.0;
     for (int i = 0; i < problem.customer.length - 1; i++) {
       for (int j = i + 1; j < problem.customer.length; j++) {
         problem.dist[i][j] = sqrt(pow(
@@ -44,8 +46,11 @@ abstract class Parser {
                     problem.customer[j].position[1],
                 2));
         problem.dist[j][i] = problem.dist[i][j];
+        sum += problem.dist[i][j];
       }
     }
+    averageDistance =
+        sum / (problem.customer.length * (problem.customer.length - 1) / 2);
     return problem;
   }
 }

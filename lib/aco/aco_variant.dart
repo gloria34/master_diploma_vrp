@@ -26,6 +26,9 @@ class ACOVariant {
       }
       for (int i = 0; i < ants; i++) {
         final result = antActivity(d, pr);
+        if (result == null) {
+          continue;
+        }
         if (result.length < bestLength) {
           bestLength = result.length;
           bestPath = result.l;
@@ -44,7 +47,7 @@ class ACOVariant {
   //d - matrix of distances
   //pr - matrix of pheromone
   //start and target are in depot [0][0]
-  AntActivityResult antActivity(List<List<double>> d, List<List<double>> pr) {
+  AntActivityResult? antActivity(List<List<double>> d, List<List<double>> pr) {
     final List<List<int>> l = [
       [0]
     ];
@@ -57,6 +60,15 @@ class ACOVariant {
     }
     while (unservedCustomers.isNotEmpty) {
       List<int> candidateList = [];
+      bool die = true;
+      for (int i = 0; i < unservedCustomers.length; i++) {
+        if (d[cur][unservedCustomers[i]] <= averageDistance * 1.5) {
+          die = false;
+        }
+      }
+      if (die && d[cur][0] > averageDistance * 1.5) {
+        return null;
+      }
       for (int i = 0; i < unservedCustomers.length; i++) {
         //check demand constraints
         if (demand[demand.length - 1] +
