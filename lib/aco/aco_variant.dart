@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:master_diploma_vrp/main.dart';
-import 'package:master_diploma_vrp/model/ant_activity_result.dart';
 import 'package:master_diploma_vrp/model/ant_colony_result.dart';
+import 'package:master_diploma_vrp/model/ant_path_result.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 
 class ACOVariant {
@@ -14,7 +14,7 @@ class ACOVariant {
   //start is depot [0][0]
   AntColonyResult antColony(List<List<double>> d) {
     double bestLength = 9999999999;
-    List<List<int>> bestPath = [];
+    List<int> bestPath = [];
     for (int it = 0; it < iterations; it++) {
       //initialize pheromone matrix
       List<List<double>> pr = [];
@@ -28,7 +28,7 @@ class ACOVariant {
         final result = antActivity(d, pr);
         if (result.length < bestLength) {
           bestLength = result.length;
-          bestPath = result.l;
+          bestPath = result.path;
         }
         //evaporation
         for (int i = 0; i < pr.length; i++) {
@@ -38,106 +38,69 @@ class ACOVariant {
         }
       }
     }
-    return AntColonyResult(bestLength: bestLength, bestPath: bestPath);
+    List<List<int>> bestPathResult = [];
+    int k = 0;
+    for (int i = 0; i < bestPath.length; i++) {
+      if (bestPathResult.length - 1 < k) {
+        bestPathResult.add([]);
+      }
+      bestPathResult[k].add(bestPath[i]);
+      if (bestPath[i] == 0 && bestPathResult[k].length > 1) {
+        k++;
+      }
+    }
+
+    return AntColonyResult(bestLength: bestLength, bestPath: bestPathResult);
   }
 
   //d - matrix of distances
   //pr - matrix of pheromone
   //start and target are in depot [0][0]
-  AntActivityResult antActivity(List<List<double>> d, List<List<double>> pr) {
-    final List<List<int>> l = [
-      [0]
-    ];
-    final List<double> demand = [0.0];
-    int cur = 0;
-    double currentTime = 0.0;
-    List<int> unservedCustomers = [];
-    for (int i = 1; i < customers.length; i++) {
-      unservedCustomers.add(i);
+  AntPathResult antActivity(List<List<double>> d, List<List<double>> pr) {
+    List<int> path = [0]; // start at depot
+    List<int> unvisited = List<int>.generate(customers.length, (i) => i)
+      ..remove(0); // all customers except depot
+
+    while (unvisited.isNotEmpty) {
+      int lastVisited = path.last;
+      List<double> probabilities = unvisited
+          .map((i) =>
+              pow(pr[lastVisited][i], alpha) / pow(d[lastVisited][i], beta))
+          .toList();
+
+      double sum = probabilities.reduce((a, b) => a + b);
+      probabilities = probabilities.map((p) => p / sum).toList();
+
+      int nextCustomer = rouletteWheelSelection(probabilities);
+      unvisited.remove(nextCustomer);
+      path.add(nextCustomer);
     }
-    while (unservedCustomers.isNotEmpty) {
-      List<int> candidateList = [];
-      for (int i = 0; i < unservedCustomers.length; i++) {
-        //check demand constraints
-        if (demand[demand.length - 1] +
-                customers[unservedCustomers[i]].demand <=
-            vehicleCapacity) {
-          //check time windows constraints
-          if (currentTime + d[cur][unservedCustomers[i]] <=
-              customers[unservedCustomers[i]].dueTime) {
-            candidateList.add(unservedCustomers[i]);
-          }
-        }
-      }
-      if (candidateList.isEmpty) {
-        //go to depot
-        l[l.length - 1].add(0);
-        l.add([0]);
-        demand.add(0.0);
-        currentTime = 0.0;
-        cur = 0;
-        continue;
-      } else {
-        List<double> probabilities = [];
-        double probabilityDenominator = 0.0;
-        for (int i = 0; i < candidateList.length; i++) {
-          // final t = customers[candidateList[i]].dueTime -
-          //     currentTime +
-          //     d[cur][candidateList[i]];
-          probabilityDenominator += pow(pr[cur][candidateList[i]], alpha) *
-                  pow(1 / d[cur][candidateList[i]],
-                      beta) /*
-              pow(1 / t, gamma)*/
-              ;
-        }
-        for (int i = 0; i < candidateList.length; i++) {
-          // final t = customers[candidateList[i]].dueTime -
-          //     currentTime +
-          //     d[cur][candidateList[i]];
-          double probabilityNumerator = (pow(pr[cur][candidateList[i]], alpha) *
-                  pow(1 / d[cur][candidateList[i]],
-                      beta) /*
-                  pow(1 / t, gamma)*/
-              )
-              .toDouble();
-          probabilities.add(probabilityNumerator / probabilityDenominator);
-        }
-        double rnd = Random().nextDouble();
-        double sum = 0.0;
-        for (int i = 0; i < probabilities.length; i++) {
-          sum += probabilities[i];
-          if (sum >= rnd) {
-            currentTime += max(customers[candidateList[i]].fromTime,
-                currentTime + d[cur][candidateList[i]]);
-            currentTime += customers[candidateList[i]].serviceTime;
-            cur = candidateList[i];
-            l[l.length - 1].add(cur);
-            unservedCustomers.remove(cur);
-            demand[demand.length - 1] += customers[cur].demand;
-            break;
-          }
-        }
+
+    path.add(0); // return to depot
+
+    double length = calculatePathLength(path, d);
+
+    return AntPathResult(length: length, path: path);
+  }
+
+  int rouletteWheelSelection(List<double> probabilities) {
+    double r = Random().nextDouble();
+    double c = 0.0;
+    for (int i = 0; i < probabilities.length; i++) {
+      c += probabilities[i];
+      if (c >= r) {
+        return i;
       }
     }
-    //go to depot
-    l[l.length - 1].add(0);
-    //calculate length
+    return probabilities.length -
+        1; // return last index if no selection made (should not happen if probabilities sum to 1)
+  }
+
+  double calculatePathLength(List<int> path, List<List<double>> d) {
     double length = 0.0;
-    int k = 0;
-    for (int i = 0; i < l.length; i++) {
-      for (int j = 0; j < l[i].length - 1; j++) {
-        length += d[l[i][j]][l[i][j + 1]];
-        k++;
-      }
+    for (int i = 0; i < path.length - 1; i++) {
+      length += d[path[i]][path[i + 1]];
     }
-    //update pheromone
-    List<List<double>> prNew = [];
-    prNew.addAll(pr);
-    for (int i = 0; i < l.length; i++) {
-      for (int j = 0; j < l[i].length - 1; j++) {
-        prNew[l[i][j]][l[i][j + 1]] += upsilon / (k * length);
-      }
-    }
-    return AntActivityResult(l: l, pr: prNew, demand: demand, length: length);
+    return length;
   }
 }
