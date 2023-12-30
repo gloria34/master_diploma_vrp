@@ -3,12 +3,12 @@ import 'dart:math';
 import 'package:master_diploma_vrp/main.dart';
 import 'package:master_diploma_vrp/model/ant_activity_result.dart';
 import 'package:master_diploma_vrp/model/problem_result.dart';
-import 'package:master_diploma_vrp/model/point_variant.dart';
+import 'package:master_diploma_vrp/model/customer_info.dart';
 
-class ACOVariant {
-  final List<PointVariant> customers;
+class AntColonyOptimization {
+  final List<CustomerInfo> customers;
 
-  ACOVariant({required this.customers});
+  AntColonyOptimization({required this.customers});
 
   //d - matrix of distances
   //start is depot [0][0]

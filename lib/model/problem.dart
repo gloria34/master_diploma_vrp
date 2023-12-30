@@ -1,6 +1,6 @@
-import 'package:master_diploma_vrp/model/point_variant.dart';
+import 'package:master_diploma_vrp/model/customer_info.dart';
 
 class Problem {
-  List<PointVariant> customer = [];
+  List<CustomerInfo> customer = [];
   List<List<double>> dist = [];
 }

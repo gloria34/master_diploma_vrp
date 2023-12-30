@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class PointVariant extends Equatable{
-
+class CustomerInfo extends Equatable {
   final int number;
   final List<double> position;
   final double demand;
@@ -9,7 +8,7 @@ class PointVariant extends Equatable{
   final double dueTime;
   final double serviceTime;
 
-  const PointVariant(
+  const CustomerInfo(
       {required this.number,
       required this.position,
       required this.demand,

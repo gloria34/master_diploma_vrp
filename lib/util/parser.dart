@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:master_diploma_vrp/model/point_variant.dart';
+import 'package:master_diploma_vrp/model/customer_info.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
 
 abstract class Parser {
@@ -13,8 +13,8 @@ abstract class Parser {
     data = data.replaceAll("  ", " ");
     data = data.replaceAll("\n", "");
     for (var i = 0; i < numberOfCustomers; i++) {
-        final split = data.split(" ").where((s) => s.isNotEmpty).toList();
-      PointVariant point = PointVariant(
+      final split = data.split(" ").where((s) => s.isNotEmpty).toList();
+      CustomerInfo point = CustomerInfo(
           number: int.parse(split[0 + i * 7]),
           position: [
             double.parse(split[1 + i * 7]),

@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
-import 'package:master_diploma_vrp/aco/aco_variant.dart';
+import 'package:master_diploma_vrp/algorithm/ant_colony_optimization.dart';
 import 'package:master_diploma_vrp/model/algorithm.dart';
 import 'package:master_diploma_vrp/model/problem_result.dart';
-import 'package:master_diploma_vrp/model/point_variant.dart';
+import 'package:master_diploma_vrp/model/customer_info.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
-import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
-import 'package:master_diploma_vrp/utils/parser.dart';
+import 'package:master_diploma_vrp/util/coordinate_painter.dart';
+import 'package:master_diploma_vrp/util/parser.dart';
 import 'dart:math' as math;
 
 Algorithm algorithm = Algorithm.antColonyOptimization;
@@ -160,7 +160,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
-  List<PointVariant> _points = [];
+  List<CustomerInfo> _points = [];
   ProblemResult? _solution;
   List<ProblemResult> _tenSolutions = [];
   int time = 0;
@@ -257,9 +257,11 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   ProblemResult _getSolution(Problem problem) {
     switch (algorithm) {
       case Algorithm.antColonyOptimization:
-        return ACOVariant(customers: problem.customer).antColony(problem.dist);
+        return AntColonyOptimization(customers: problem.customer)
+            .antColony(problem.dist);
       case Algorithm.deterministicAnnealing:
-        return ACOVariant(customers: problem.customer).antColony(problem.dist);
+        return AntColonyOptimization(customers: problem.customer)
+            .antColony(problem.dist);
     }
   }
 }
@@ -550,7 +552,7 @@ class _ProblemParamsState extends State<_ProblemParams> {
 }
 
 class _CoordinatePlane extends StatefulWidget {
-  final List<PointVariant> points;
+  final List<CustomerInfo> points;
   final ProblemResult? answer;
 
   const _CoordinatePlane({required this.points, required this.answer});

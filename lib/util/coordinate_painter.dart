@@ -2,10 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/main.dart';
-import 'package:master_diploma_vrp/model/point_variant.dart';
+import 'package:master_diploma_vrp/model/customer_info.dart';
 
 class CoordinatePainter extends CustomPainter {
-  final List<PointVariant> points;
+  final List<CustomerInfo> points;
   final int zoomX;
   final int zoomY;
   final bool isLabelsVisible;
@@ -26,7 +26,7 @@ class CoordinatePainter extends CustomPainter {
     if (answer != null) {
       _drawLines(canvas, size);
     }
-    for (PointVariant point in points) {
+    for (CustomerInfo point in points) {
       double dx = point.position[0] * zoomX;
       double dy = size.height - (point.position[1] * zoomY);
       offsets.add(Offset(dx, dy));
