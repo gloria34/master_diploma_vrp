@@ -84,19 +84,33 @@ class ACOVariant {
           final t = customers[candidateList[i]].dueTime -
               currentTime +
               d[cur][candidateList[i]];
-          probabilityDenominator += pow(pr[cur][candidateList[i]], alpha) *
-              pow(1 / d[cur][candidateList[i]], beta) *
-              pow(1 / t, gamma);
+          if (includeTimeWindowsProbability) {
+            probabilityDenominator += pow(pr[cur][candidateList[i]], alpha) *
+                pow(1 / d[cur][candidateList[i]], beta) *
+                pow(1 / t, gamma);
+          } else {
+            probabilityDenominator += pow(pr[cur][candidateList[i]], alpha) *
+                pow(1 / d[cur][candidateList[i]], beta);
+          }
         }
         for (int i = 0; i < candidateList.length; i++) {
           final t = customers[candidateList[i]].dueTime -
               currentTime +
               d[cur][candidateList[i]];
-          double probabilityNumerator = (pow(pr[cur][candidateList[i]], alpha) *
-                  pow(1 / d[cur][candidateList[i]], beta) *
-                  pow(1 / t, gamma))
-              .toDouble();
-          probabilities.add(probabilityNumerator / probabilityDenominator);
+          if (includeTimeWindowsProbability) {
+            double probabilityNumerator =
+                (pow(pr[cur][candidateList[i]], alpha) *
+                        pow(1 / d[cur][candidateList[i]], beta) *
+                        pow(1 / t, gamma))
+                    .toDouble();
+            probabilities.add(probabilityNumerator / probabilityDenominator);
+          } else {
+            double probabilityNumerator =
+                (pow(pr[cur][candidateList[i]], alpha) *
+                        pow(1 / d[cur][candidateList[i]], beta))
+                    .toDouble();
+            probabilities.add(probabilityNumerator / probabilityDenominator);
+          }
         }
         double rnd = Random().nextDouble();
         double sum = 0.0;

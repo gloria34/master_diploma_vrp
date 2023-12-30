@@ -17,11 +17,14 @@ int ants = 101;
 int iterations = 1000;
 double alpha = 2;
 double beta = 3;
-double gamma = 2; //time windows influence factor
 double upsilon = 1600;
 double xi = 0.1; //initial pheromone
 double delta = 0.1; //pheromone evaporation
 List<Color> randomColors = [];
+
+bool includeTimeWindowsProbability = true;
+double gamma = 2; //time windows influence factor
+
 String initialProblem =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
     2      41.00      49.00      10.00     161.00     171.00      10.00
@@ -250,7 +253,20 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   }
 }
 
-class _ProblemParams extends StatelessWidget {
+class _ProblemParams extends StatefulWidget {
+  final Function(Problem) onSolveTap;
+  final Function(Problem) onGetTemSolutionsTap;
+
+  const _ProblemParams(
+      {required this.onSolveTap, required this.onGetTemSolutionsTap});
+
+  @override
+  State<StatefulWidget> createState() {
+    return _ProblemParamsState();
+  }
+}
+
+class _ProblemParamsState extends State<_ProblemParams> {
   final TextEditingController problemTextController =
       TextEditingController(text: initialProblem);
   final TextEditingController numberOfCustomersController =
@@ -273,12 +289,6 @@ class _ProblemParams extends StatelessWidget {
       TextEditingController(text: upsilon.toString());
   final TextEditingController deltaController =
       TextEditingController(text: delta.toString());
-  final Function(Problem) onSolveTap;
-  final Function(Problem) onGetTemSolutionsTap;
-
-  _ProblemParams(
-      {required this.onSolveTap, required this.onGetTemSolutionsTap});
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -360,16 +370,6 @@ class _ProblemParams extends StatelessWidget {
               ),
               Expanded(
                 child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Gamma'),
-                  keyboardType: TextInputType.number,
-                  controller: gammaController,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextFormField(
                   decoration: const InputDecoration(labelText: 'Xi'),
                   keyboardType: TextInputType.number,
                   controller: xiController,
@@ -397,6 +397,31 @@ class _ProblemParams extends StatelessWidget {
               ),
             ],
           ),
+          Row(
+            children: [
+              const Text("Include time windows probability"),
+              Switch(
+                  value: includeTimeWindowsProbability,
+                  onChanged: (value) {
+                    setState(() {
+                      includeTimeWindowsProbability = value;
+                    });
+                  }),
+              const SizedBox(
+                width: 10,
+              ),
+              Visibility(
+                visible: includeTimeWindowsProbability,
+                child: Expanded(
+                  child: TextFormField(
+                    decoration: const InputDecoration(labelText: 'Gamma'),
+                    keyboardType: TextInputType.number,
+                    controller: gammaController,
+                  ),
+                ),
+              ),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 10),
             child: Row(
@@ -408,7 +433,7 @@ class _ProblemParams extends StatelessWidget {
                           problemTextController.text,
                           int.parse(numberOfCustomersController.text));
                       _setProblemParams();
-                      onSolveTap(load);
+                      widget.onSolveTap(load);
                     },
                     child: const Text("Solve")),
                 TextButton(
@@ -417,7 +442,7 @@ class _ProblemParams extends StatelessWidget {
                           problemTextController.text,
                           int.parse(numberOfCustomersController.text));
                       _setProblemParams();
-                      onGetTemSolutionsTap(load);
+                      widget.onGetTemSolutionsTap(load);
                     },
                     child: const Text("Get 10 solutions")),
               ],
