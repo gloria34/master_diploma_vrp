@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:master_diploma_vrp/main.dart';
 import 'package:master_diploma_vrp/model/ant_activity_result.dart';
-import 'package:master_diploma_vrp/model/ant_colony_result.dart';
+import 'package:master_diploma_vrp/model/problem_result.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 
 class ACOVariant {
@@ -12,7 +12,7 @@ class ACOVariant {
 
   //d - matrix of distances
   //start is depot [0][0]
-  AntColonyResult antColony(List<List<double>> d) {
+  ProblemResult antColony(List<List<double>> d) {
     double bestLength = 9999999999;
     List<List<int>> bestPath = [];
     for (int it = 0; it < iterations; it++) {
@@ -38,7 +38,7 @@ class ACOVariant {
         }
       }
     }
-    return AntColonyResult(bestLength: bestLength, bestPath: bestPath);
+    return ProblemResult(bestLength: bestLength, bestPath: bestPath);
   }
 
   //d - matrix of distances

@@ -3,16 +3,17 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/aco/aco_variant.dart';
-import 'package:master_diploma_vrp/model/ant_colony_result.dart';
+import 'package:master_diploma_vrp/model/algorithm.dart';
+import 'package:master_diploma_vrp/model/problem_result.dart';
 import 'package:master_diploma_vrp/model/point_variant.dart';
 import 'package:master_diploma_vrp/model/problem.dart';
 import 'package:master_diploma_vrp/utils/coordinate_painter.dart';
 import 'package:master_diploma_vrp/utils/parser.dart';
 import 'dart:math' as math;
 
-//initial problem details
-int vehicleCapacity = 200;
-int numberOfCustomers = 101;
+Algorithm algorithm = Algorithm.antColonyOptimization;
+
+//aco params
 int ants = 101;
 int iterations = 1000;
 double alpha = 2;
@@ -20,11 +21,14 @@ double beta = 3;
 double upsilon = 1600;
 double xi = 0.1; //initial pheromone
 double delta = 0.1; //pheromone evaporation
-List<Color> randomColors = [];
-
 bool includeTimeWindowsProbability = true;
 double gamma = 2; //time windows influence factor
 
+List<Color> randomColors = [];
+
+//initial problem details
+int vehicleCapacity = 200;
+int numberOfCustomers = 101;
 String initialProblem =
     """1      35.00      35.00       0.00       0.00     230.00       0.00
     2      41.00      49.00      10.00     161.00     171.00      10.00
@@ -157,8 +161,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
   List<PointVariant> _points = [];
-  AntColonyResult? _solution;
-  List<AntColonyResult> _tenSolutions = [];
+  ProblemResult? _solution;
+  List<ProblemResult> _tenSolutions = [];
   int time = 0;
   @override
   Widget build(BuildContext context) {
@@ -177,7 +181,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
                   onSolveTap: (problem) {
                     _solveProblem(problem);
                   },
-                  onGetTemSolutionsTap: (problem) {
+                  onGetTenSolutionsTap: (problem) {
                     _getTenSolutions(problem);
                   },
                 ),
@@ -222,8 +226,7 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
       _points = problem.customer;
     });
     int start = DateTime.now().millisecondsSinceEpoch;
-    final solution =
-        ACOVariant(customers: problem.customer).antColony(problem.dist);
+    final solution = _getSolution(problem);
     setState(() {
       _solution = solution;
     });
@@ -238,27 +241,35 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
     });
     for (int i = 0; i < 10; i++) {
       int start = DateTime.now().millisecondsSinceEpoch;
-      final solution =
-          ACOVariant(customers: problem.customer).antColony(problem.dist);
+      final solution = _getSolution(problem);
       int end = DateTime.now().millisecondsSinceEpoch;
       solution.time = end - start;
       _tenSolutions.add(solution);
     }
-    AntColonyResult shortest = _tenSolutions.reduce((current, next) =>
+    ProblemResult shortest = _tenSolutions.reduce((current, next) =>
         current.bestLength < next.bestLength ? current : next);
     setState(() {
       _solution = shortest;
       time = shortest.time;
     });
   }
+
+  ProblemResult _getSolution(Problem problem) {
+    switch (algorithm) {
+      case Algorithm.antColonyOptimization:
+        return ACOVariant(customers: problem.customer).antColony(problem.dist);
+      case Algorithm.deterministicAnnealing:
+        return ACOVariant(customers: problem.customer).antColony(problem.dist);
+    }
+  }
 }
 
 class _ProblemParams extends StatefulWidget {
   final Function(Problem) onSolveTap;
-  final Function(Problem) onGetTemSolutionsTap;
+  final Function(Problem) onGetTenSolutionsTap;
 
   const _ProblemParams(
-      {required this.onSolveTap, required this.onGetTemSolutionsTap});
+      {required this.onSolveTap, required this.onGetTenSolutionsTap});
 
   @override
   State<StatefulWidget> createState() {
@@ -295,133 +306,58 @@ class _ProblemParamsState extends State<_ProblemParams> {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
+          const Text(
+            "Problem params",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           TextFormField(
             decoration: const InputDecoration(labelText: 'Problem text'),
             keyboardType: TextInputType.multiline,
             maxLines: null,
             controller: problemTextController,
           ),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  decoration:
-                      const InputDecoration(labelText: 'Number of customers'),
-                  keyboardType: TextInputType.number,
-                  controller: numberOfCustomersController,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextFormField(
-                  decoration:
-                      const InputDecoration(labelText: 'Vehicle capacity'),
-                  keyboardType: TextInputType.number,
-                  controller: vehicleCapacityController,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextFormField(
-                  decoration:
-                      const InputDecoration(labelText: 'Number of ants'),
-                  keyboardType: TextInputType.number,
-                  controller: numberOfAntsController,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextFormField(
-                  decoration:
-                      const InputDecoration(labelText: 'Number of iterations'),
-                  keyboardType: TextInputType.number,
-                  controller: numberOfIterationsController,
-                ),
-              ),
-            ],
+          _buildProblemFields(),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 10),
+            child: Text(
+              "Algorithm params",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
           ),
-          Row(
-            children: [
-              Expanded(
-                child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Alpha'),
-                  keyboardType: TextInputType.number,
-                  controller: alphaController,
-                ),
+          SizedBox(
+            width: MediaQuery.of(context).size.width - 40,
+            child: DropdownButton<Algorithm>(
+              value: algorithm,
+              elevation: 16,
+              icon: const Icon(Icons.arrow_downward),
+              underline: Container(
+                height: 1,
+                color: Colors.black,
               ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Beta'),
-                  keyboardType: TextInputType.number,
-                  controller: betaController,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Xi'),
-                  keyboardType: TextInputType.number,
-                  controller: xiController,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Upsilon'),
-                  keyboardType: TextInputType.number,
-                  controller: upsilonController,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: TextFormField(
-                  decoration: const InputDecoration(labelText: 'Delta'),
-                  keyboardType: TextInputType.number,
-                  controller: deltaController,
-                ),
-              ),
-            ],
+              onChanged: (Algorithm? value) {
+                setState(() {
+                  algorithm = value!;
+                });
+              },
+              items: Algorithm.values
+                  .map<DropdownMenuItem<Algorithm>>((Algorithm value) {
+                return DropdownMenuItem<Algorithm>(
+                  value: value,
+                  child: SizedBox(
+                      width: MediaQuery.of(context).size.width - 70,
+                      child: Text(value.title)),
+                );
+              }).toList(),
+            ),
           ),
-          Row(
-            children: [
-              const Text("Include time windows probability"),
-              Switch(
-                  value: includeTimeWindowsProbability,
-                  onChanged: (value) {
-                    setState(() {
-                      includeTimeWindowsProbability = value;
-                    });
-                  }),
-              const SizedBox(
-                width: 10,
-              ),
-              Visibility(
-                visible: includeTimeWindowsProbability,
-                child: Expanded(
-                  child: TextFormField(
-                    decoration: const InputDecoration(labelText: 'Gamma'),
-                    keyboardType: TextInputType.number,
-                    controller: gammaController,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          Builder(builder: (context) {
+            switch (algorithm) {
+              case Algorithm.antColonyOptimization:
+                return _buildAcoFields();
+              case Algorithm.deterministicAnnealing:
+                return _buildDaFields();
+            }
+          }),
           Padding(
             padding: const EdgeInsets.only(top: 10),
             child: Row(
@@ -442,7 +378,7 @@ class _ProblemParamsState extends State<_ProblemParams> {
                           problemTextController.text,
                           int.parse(numberOfCustomersController.text));
                       _setProblemParams();
-                      widget.onGetTemSolutionsTap(load);
+                      widget.onGetTenSolutionsTap(load);
                     },
                     child: const Text("Get 10 solutions")),
               ],
@@ -453,10 +389,153 @@ class _ProblemParamsState extends State<_ProblemParams> {
     );
   }
 
+  Widget _buildProblemFields() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextFormField(
+            decoration: const InputDecoration(labelText: 'Number of customers'),
+            keyboardType: TextInputType.number,
+            controller: numberOfCustomersController,
+          ),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        Expanded(
+          child: TextFormField(
+            decoration: const InputDecoration(labelText: 'Vehicle capacity'),
+            keyboardType: TextInputType.number,
+            controller: vehicleCapacityController,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAcoFields() {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                decoration: const InputDecoration(labelText: 'Number of ants'),
+                keyboardType: TextInputType.number,
+                controller: numberOfAntsController,
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: TextFormField(
+                decoration:
+                    const InputDecoration(labelText: 'Number of iterations'),
+                keyboardType: TextInputType.number,
+                controller: numberOfIterationsController,
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: TextFormField(
+                decoration: const InputDecoration(labelText: 'Xi'),
+                keyboardType: TextInputType.number,
+                controller: xiController,
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: TextFormField(
+                decoration: const InputDecoration(labelText: 'Upsilon'),
+                keyboardType: TextInputType.number,
+                controller: upsilonController,
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: TextFormField(
+                decoration: const InputDecoration(labelText: 'Delta'),
+                keyboardType: TextInputType.number,
+                controller: deltaController,
+              ),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                decoration: const InputDecoration(labelText: 'Alpha'),
+                keyboardType: TextInputType.number,
+                controller: alphaController,
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            Expanded(
+              child: TextFormField(
+                decoration: const InputDecoration(labelText: 'Beta'),
+                keyboardType: TextInputType.number,
+                controller: betaController,
+              ),
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            const Text("Include time windows probability"),
+            Switch(
+                value: includeTimeWindowsProbability,
+                onChanged: (value) {
+                  setState(() {
+                    includeTimeWindowsProbability = value;
+                  });
+                }),
+            const SizedBox(
+              width: 10,
+            ),
+            Visibility(
+              visible: includeTimeWindowsProbability,
+              child: Expanded(
+                child: TextFormField(
+                  decoration: const InputDecoration(labelText: 'Gamma'),
+                  keyboardType: TextInputType.number,
+                  controller: gammaController,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDaFields() {
+    return const Row();
+  }
+
   void _setProblemParams() {
     initialProblem = problemTextController.text;
     numberOfCustomers = int.parse(numberOfCustomersController.text);
     vehicleCapacity = int.parse(vehicleCapacityController.text);
+    switch (algorithm) {
+      case Algorithm.antColonyOptimization:
+        setAcoParams();
+        break;
+      case Algorithm.deterministicAnnealing:
+        setDaParams();
+        break;
+    }
+  }
+
+  void setAcoParams() {
     ants = int.parse(numberOfAntsController.text);
     beta = double.parse(betaController.text);
     upsilon = double.parse(upsilonController.text);
@@ -466,11 +545,13 @@ class _ProblemParamsState extends State<_ProblemParams> {
     delta = double.parse(deltaController.text);
     gamma = double.parse(gammaController.text);
   }
+
+  void setDaParams() {}
 }
 
 class _CoordinatePlane extends StatefulWidget {
   final List<PointVariant> points;
-  final AntColonyResult? answer;
+  final ProblemResult? answer;
 
   const _CoordinatePlane({required this.points, required this.answer});
 
@@ -553,7 +634,7 @@ class _CoordinatePlaneState extends State<_CoordinatePlane> {
 }
 
 class _AnswerInfo extends StatelessWidget {
-  final AntColonyResult answer;
+  final ProblemResult answer;
   final int time;
 
   const _AnswerInfo({required this.answer, required this.time});
@@ -571,7 +652,7 @@ class _AnswerInfo extends StatelessWidget {
 }
 
 class _SolutionLogs extends StatelessWidget {
-  final List<AntColonyResult> tenSolutions;
+  final List<ProblemResult> tenSolutions;
 
   const _SolutionLogs({required this.tenSolutions});
 
