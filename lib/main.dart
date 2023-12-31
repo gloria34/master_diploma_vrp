@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/algorithm/ant_colony_optimization.dart';
+import 'package:master_diploma_vrp/algorithm/deteministic_annealing.dart';
 import 'package:master_diploma_vrp/model/algorithm.dart';
 import 'package:master_diploma_vrp/model/problem_result.dart';
 import 'package:master_diploma_vrp/model/customer_info.dart';
@@ -23,6 +24,9 @@ double xi = 0.1; //initial pheromone
 double delta = 0.1; //pheromone evaporation
 bool includeTimeWindowsProbability = true;
 double gamma = 2; //time windows influence factor
+
+//da params
+double initialDemonEnergy = 2000;
 
 List<Color> randomColors = [];
 
@@ -260,8 +264,8 @@ class _MyHomePageState extends State<MyHomePage> with AfterLayoutMixin {
         return AntColonyOptimization(customers: problem.customer)
             .antColony(problem.dist);
       case Algorithm.deterministicAnnealing:
-        return AntColonyOptimization(customers: problem.customer)
-            .antColony(problem.dist);
+        return DeterministicAnnealing(customers: problem.customer)
+            .deterministicAnnealing(problem.dist);
     }
   }
 }
