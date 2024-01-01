@@ -26,7 +26,9 @@ bool includeTimeWindowsProbability = true;
 double gamma = 2; //time windows influence factor
 
 //da params
-double initialDemonEnergy = 2000;
+double initialDemonEnergy = 200;
+int neighborhoodRadius = 26;
+double demonEnergyAlpha = 0.99;
 
 List<Color> randomColors = [];
 

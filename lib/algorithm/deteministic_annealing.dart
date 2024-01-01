@@ -10,12 +10,38 @@ class DeterministicAnnealing {
   DeterministicAnnealing({required this.customers});
 
   ProblemResult deterministicAnnealing(List<List<double>> d) {
-    List<List<int>> solution = generateInitialSolution(d);
-    double length = calculateLength(d, solution);
-    double x = calculateLength(d, solution) + calculateFines(d, solution);
+    List<List<int>> xTrip = generateInitialSolution(d);
+    double xLength = calculateLength(d, xTrip);
+    double x = xLength + calculateFines(d, xTrip);
+    double demonEnergy = initialDemonEnergy;
     int frozen = 0;
-    // while (frozen < 3) {}
-    return ProblemResult(bestLength: length, bestPath: solution);
+    int accepted = 0;
+    int rejected = 0;
+    while (frozen < 3) {
+      List<List<int>> yTrip = getNeighbor(xTrip);
+      double yLength = calculateLength(d, yTrip);
+      double y = yLength + calculateFines(d, yTrip);
+      final double delta = y - x;
+      if (delta < demonEnergy) {
+        xTrip = yTrip;
+        xLength = yLength;
+        x = y;
+        frozen = 0;
+        accepted++;
+      } else {
+        rejected++;
+      }
+      if (accepted == neighborhoodRadius ||
+          rejected == 2 * neighborhoodRadius) {
+        demonEnergy *= demonEnergyAlpha;
+        if (rejected == 2 * neighborhoodRadius) {
+          frozen++;
+        }
+        accepted = 0;
+        rejected = 0;
+      }
+    }
+    return ProblemResult(bestLength: xLength, bestPath: xTrip);
   }
 
   List<List<int>> generateInitialSolution(List<List<double>> d) {
@@ -112,5 +138,29 @@ class DeterministicAnnealing {
       }
     }
     return 0.0;
+  }
+
+  List<List<int>> getNeighbor(List<List<int>> l) {
+    final List<List<int>> neighbor = [];
+    for (int i = 0; i < l.length; i++) {
+      neighbor.add([]);
+      for (int j = 0; j < l[i].length; j++) {
+        neighbor[i].add(l[i][j]);
+      }
+    }
+    int firstRandomRoute = Random().nextInt(l.length);
+    int secondRandomRoute = Random().nextInt(l.length);
+    while (firstRandomRoute == secondRandomRoute) {
+      secondRandomRoute = Random().nextInt(l.length);
+    }
+    int firstRandomCustomer =
+        Random().nextInt(l[firstRandomRoute].length - 2) + 1;
+    int secondRandomCustomer =
+        Random().nextInt(l[secondRandomRoute].length - 2) + 1;
+    neighbor[firstRandomRoute][firstRandomCustomer] =
+        l[secondRandomRoute][secondRandomCustomer];
+    neighbor[secondRandomRoute][secondRandomCustomer] =
+        l[firstRandomRoute][firstRandomCustomer];
+    return neighbor;
   }
 }
