@@ -10,12 +10,12 @@ class DeterministicAnnealing {
   DeterministicAnnealing({required this.customers});
 
   ProblemResult deterministicAnnealing(List<List<double>> d) {
-    List<List<int>> initialSolution = generateInitialSolution(d);
-    double x = calculateLength(d, initialSolution);
+    List<List<int>> solution = generateInitialSolution(d);
+    double length = calculateLength(d, solution);
+    double x = calculateLength(d, solution) + calculateFines(d, solution);
     int frozen = 0;
-    while (frozen < 3) {}
-
-    return ProblemResult(bestLength: x, bestPath: initialSolution);
+    // while (frozen < 3) {}
+    return ProblemResult(bestLength: length, bestPath: solution);
   }
 
   List<List<int>> generateInitialSolution(List<List<double>> d) {
@@ -93,19 +93,24 @@ class DeterministicAnnealing {
   }
 
   double calculateFines(List<List<double>> d, List<List<int>> l) {
-    double fines = 0.0;
     for (int i = 0; i < l.length; i++) {
       double currentTime = 0.0;
+      double demand = 0.0;
       for (int j = 0; j < l[i].length - 1; j++) {
-        currentTime = max(customers[l[i][j + 1]].fromTime,
-            currentTime + d[l[i][j]][l[i][j + 1]]);
-        currentTime += customers[l[i][j]].serviceTime;
-        if (currentTime > customers[l[i][j + 1]].dueTime) {
-          fines += currentTime - customers[l[i][j]].dueTime;
+        int fromCustomer = l[i][j];
+        int toCustomer = l[i][j + 1];
+        currentTime = max(customers[toCustomer].fromTime,
+            currentTime + d[fromCustomer][toCustomer]);
+        demand += customers[toCustomer].demand;
+        if (currentTime > customers[toCustomer].dueTime) {
+          return 9999999;
         }
-        currentTime += d[l[i][j]][l[i][j + 1]];
+        if (demand > vehicleCapacity) {
+          return 9999999;
+        }
+        currentTime += customers[toCustomer].serviceTime;
       }
     }
-    return fines;
+    return 0.0;
   }
 }
