@@ -151,18 +151,29 @@ class DeterministicAnnealing {
       }
     }
     int firstRandomRoute = Random().nextInt(l.length);
+    int firstRandomCustomer = Random().nextInt(l[firstRandomRoute].length - 2) +
+        1; //first and last customers are depot
     int secondRandomRoute = Random().nextInt(l.length);
-    while (firstRandomRoute == secondRandomRoute) {
-      secondRandomRoute = Random().nextInt(l.length);
+    neighbor[secondRandomRoute] = buildNewRoute(neighbor[secondRandomRoute],
+        neighbor[firstRandomRoute][firstRandomCustomer]);
+    if (neighbor[firstRandomRoute].length == 3) {
+      neighbor.removeAt(firstRandomRoute);
+    } else {
+      neighbor[firstRandomRoute].removeAt(firstRandomCustomer);
     }
-    int firstRandomCustomer =
-        Random().nextInt(l[firstRandomRoute].length - 2) + 1;
-    int secondRandomCustomer =
-        Random().nextInt(l[secondRandomRoute].length - 2) + 1;
-    neighbor[firstRandomRoute][firstRandomCustomer] =
-        l[secondRandomRoute][secondRandomCustomer];
-    neighbor[secondRandomRoute][secondRandomCustomer] =
-        l[firstRandomRoute][firstRandomCustomer];
     return neighbor;
+  }
+
+  List<int> buildNewRoute(List<int> route, int newPoint) {
+    List<int> newRoute = [];
+    int position = Random().nextInt(route.length - 2) + 1;
+    for (int i = 0; i < position; i++) {
+      newRoute.add(route[i]);
+    }
+    newRoute.add(newPoint);
+    for (int i = position; i < route.length; i++) {
+      newRoute.add(route[i]);
+    }
+    return newRoute;
   }
 }
