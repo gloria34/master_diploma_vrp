@@ -27,7 +27,7 @@ double gamma = 2; //time windows influence factor
 
 //da params
 double initialDemonEnergy = 200;
-int neighborhoodRadius = 26;
+int neighborhoodRadius = 100;
 double demonEnergyAlpha = 0.995;
 
 List<Color> randomColors = [];
@@ -286,12 +286,14 @@ class _ProblemParams extends StatefulWidget {
 }
 
 class _ProblemParamsState extends State<_ProblemParams> {
+  //problem params
   final TextEditingController problemTextController =
       TextEditingController(text: initialProblem);
   final TextEditingController numberOfCustomersController =
       TextEditingController(text: numberOfCustomers.toString());
   final TextEditingController vehicleCapacityController =
       TextEditingController(text: vehicleCapacity.toString());
+  //aco params
   final TextEditingController numberOfAntsController =
       TextEditingController(text: ants.toString());
   final TextEditingController numberOfIterationsController =
@@ -308,6 +310,14 @@ class _ProblemParamsState extends State<_ProblemParams> {
       TextEditingController(text: upsilon.toString());
   final TextEditingController deltaController =
       TextEditingController(text: delta.toString());
+//da params
+  final TextEditingController initialDemonEnergyController =
+      TextEditingController(text: initialDemonEnergy.toString());
+  final TextEditingController demonEnergyAlphaController =
+      TextEditingController(text: demonEnergyAlpha.toString());
+  final TextEditingController neighborhoodRadiusController =
+      TextEditingController(text: neighborhoodRadius.toString());
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -526,7 +536,38 @@ class _ProblemParamsState extends State<_ProblemParams> {
   }
 
   Widget _buildDaFields() {
-    return const Row();
+    return Row(
+      children: [
+        Expanded(
+          child: TextFormField(
+            decoration: const InputDecoration(labelText: 'Alpha'),
+            keyboardType: TextInputType.number,
+            controller: demonEnergyAlphaController,
+          ),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        Expanded(
+          child: TextFormField(
+            decoration:
+                const InputDecoration(labelText: 'Initial demon energy'),
+            keyboardType: TextInputType.number,
+            controller: initialDemonEnergyController,
+          ),
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        Expanded(
+          child: TextFormField(
+            decoration: const InputDecoration(labelText: 'Neighborhood radius'),
+            keyboardType: TextInputType.number,
+            controller: neighborhoodRadiusController,
+          ),
+        ),
+      ],
+    );
   }
 
   void _setProblemParams() {
@@ -554,7 +595,11 @@ class _ProblemParamsState extends State<_ProblemParams> {
     gamma = double.parse(gammaController.text);
   }
 
-  void setDaParams() {}
+  void setDaParams() {
+    initialDemonEnergy = double.parse(initialDemonEnergyController.text);
+    neighborhoodRadius = int.parse(neighborhoodRadiusController.text);
+    demonEnergyAlpha = double.parse(demonEnergyAlphaController.text);
+  }
 }
 
 class _CoordinatePlane extends StatefulWidget {
