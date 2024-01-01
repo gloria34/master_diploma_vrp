@@ -9,6 +9,7 @@ class DeterministicAnnealing {
 
   DeterministicAnnealing({required this.customers});
 
+  //d - matrix of distances
   ProblemResult deterministicAnnealing(List<List<double>> d) {
     List<List<int>> xTrip = generateInitialSolution(d);
     double xLength = calculateLength(d, xTrip);
@@ -44,6 +45,7 @@ class DeterministicAnnealing {
     return ProblemResult(bestLength: xLength, bestPath: xTrip);
   }
 
+  //d - matrix of distances
   List<List<int>> generateInitialSolution(List<List<double>> d) {
     List<List<int>> l = [
       [0]
@@ -108,6 +110,8 @@ class DeterministicAnnealing {
     return l;
   }
 
+//d - matrix of distances
+//l - path
   double calculateLength(List<List<double>> d, List<List<int>> l) {
     double length = 0.0;
     for (int i = 0; i < l.length; i++) {
@@ -118,6 +122,8 @@ class DeterministicAnnealing {
     return length;
   }
 
+//d - matrix of distances
+//l - path
   double calculateFines(List<List<double>> d, List<List<int>> l) {
     for (int i = 0; i < l.length; i++) {
       double currentTime = 0.0;
@@ -140,6 +146,7 @@ class DeterministicAnnealing {
     return 0.0;
   }
 
+//l - path
   List<List<int>> getNeighbor(List<List<int>> l) {
     final List<List<int>> neighbor = [];
     for (int i = 0; i < l.length; i++) {

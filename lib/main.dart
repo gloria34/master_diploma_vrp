@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:master_diploma_vrp/algorithm/ant_colony_optimization.dart';
-import 'package:master_diploma_vrp/algorithm/deteministic_annealing.dart';
+import 'package:master_diploma_vrp/algorithm/deterministic_annealing.dart';
 import 'package:master_diploma_vrp/model/algorithm.dart';
 import 'package:master_diploma_vrp/model/problem_result.dart';
 import 'package:master_diploma_vrp/model/customer_info.dart';
@@ -27,7 +27,7 @@ double gamma = 2; //time windows influence factor
 
 //da params
 double initialDemonEnergy = 200;
-int neighborhoodRadius = 100;
+int neighborhoodRadius = 400;
 double demonEnergyAlpha = 0.995;
 
 List<Color> randomColors = [];
