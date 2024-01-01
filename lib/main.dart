@@ -28,7 +28,8 @@ double gamma = 2; //time windows influence factor
 //da params
 double initialDemonEnergy = 200;
 int neighborhoodRadius = 26;
-double demonEnergyAlpha = 0.99;
+double demonEnergyAlpha = 0.995;
+double daIterations = 500;
 
 List<Color> randomColors = [];
 

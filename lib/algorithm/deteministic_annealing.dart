@@ -13,32 +13,34 @@ class DeterministicAnnealing {
     List<List<int>> xTrip = generateInitialSolution(d);
     double xLength = calculateLength(d, xTrip);
     double x = xLength + calculateFines(d, xTrip);
-    double demonEnergy = initialDemonEnergy;
-    int frozen = 0;
-    int accepted = 0;
-    int rejected = 0;
-    while (frozen < 3) {
-      List<List<int>> yTrip = getNeighbor(xTrip);
-      double yLength = calculateLength(d, yTrip);
-      double y = yLength + calculateFines(d, yTrip);
-      final double delta = y - x;
-      if (delta < demonEnergy) {
-        xTrip = yTrip;
-        xLength = yLength;
-        x = y;
-        frozen = 0;
-        accepted++;
-      } else {
-        rejected++;
-      }
-      if (accepted == neighborhoodRadius ||
-          rejected == 2 * neighborhoodRadius) {
-        demonEnergy *= demonEnergyAlpha;
-        if (rejected == 2 * neighborhoodRadius) {
-          frozen++;
+    for (int i = 0; i < daIterations; i++) {
+      double demonEnergy = initialDemonEnergy;
+      int frozen = 0;
+      int accepted = 0;
+      int rejected = 0;
+      while (frozen < 3) {
+        List<List<int>> yTrip = getNeighbor(xTrip);
+        double yLength = calculateLength(d, yTrip);
+        double y = yLength + calculateFines(d, yTrip);
+        final double delta = y - x;
+        if (delta < demonEnergy && delta != 0.0) {
+          xTrip = yTrip;
+          xLength = yLength;
+          x = y;
+          frozen = 0;
+          accepted++;
+        } else {
+          rejected++;
         }
-        accepted = 0;
-        rejected = 0;
+        if (accepted == neighborhoodRadius ||
+            rejected == 2 * neighborhoodRadius) {
+          demonEnergy *= demonEnergyAlpha;
+          if (rejected == 2 * neighborhoodRadius) {
+            frozen++;
+          }
+          accepted = 0;
+          rejected = 0;
+        }
       }
     }
     return ProblemResult(bestLength: xLength, bestPath: xTrip);
