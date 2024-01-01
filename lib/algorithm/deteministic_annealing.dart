@@ -13,34 +13,32 @@ class DeterministicAnnealing {
     List<List<int>> xTrip = generateInitialSolution(d);
     double xLength = calculateLength(d, xTrip);
     double x = xLength + calculateFines(d, xTrip);
-    for (int i = 0; i < daIterations; i++) {
-      double demonEnergy = initialDemonEnergy;
-      int frozen = 0;
-      int accepted = 0;
-      int rejected = 0;
-      while (frozen < 3) {
-        List<List<int>> yTrip = getNeighbor(xTrip);
-        double yLength = calculateLength(d, yTrip);
-        double y = yLength + calculateFines(d, yTrip);
-        final double delta = y - x;
-        if (delta < demonEnergy && delta != 0.0) {
-          xTrip = yTrip;
-          xLength = yLength;
-          x = y;
-          frozen = 0;
-          accepted++;
-        } else {
-          rejected++;
+    double demonEnergy = initialDemonEnergy;
+    int frozen = 0;
+    int accepted = 0;
+    int rejected = 0;
+    while (frozen < 3) {
+      List<List<int>> yTrip = getNeighbor(xTrip);
+      double yLength = calculateLength(d, yTrip);
+      double y = yLength + calculateFines(d, yTrip);
+      final double delta = y - x;
+      if (delta < demonEnergy && delta != 0.0) {
+        xTrip = yTrip;
+        xLength = yLength;
+        x = y;
+        frozen = 0;
+        accepted++;
+      } else {
+        rejected++;
+      }
+      if (accepted == neighborhoodRadius ||
+          rejected == 2 * neighborhoodRadius) {
+        demonEnergy *= demonEnergyAlpha;
+        if (rejected == 2 * neighborhoodRadius) {
+          frozen++;
         }
-        if (accepted == neighborhoodRadius ||
-            rejected == 2 * neighborhoodRadius) {
-          demonEnergy *= demonEnergyAlpha;
-          if (rejected == 2 * neighborhoodRadius) {
-            frozen++;
-          }
-          accepted = 0;
-          rejected = 0;
-        }
+        accepted = 0;
+        rejected = 0;
       }
     }
     return ProblemResult(bestLength: xLength, bestPath: xTrip);
@@ -150,23 +148,26 @@ class DeterministicAnnealing {
         neighbor[i].add(l[i][j]);
       }
     }
-    int firstRandomRoute = Random().nextInt(l.length);
-    int firstRandomCustomer = Random().nextInt(l[firstRandomRoute].length - 2) +
-        1; //first and last customers are depot
-    int secondRandomRoute = Random().nextInt(l.length);
+    int firstRandomRoute = Random().nextInt(neighbor.length);
+    int firstRandomCustomer =
+        Random().nextInt(neighbor[firstRandomRoute].length - 2) +
+            1; //first and last customers are depot
+    int secondRandomRoute = Random().nextInt(neighbor.length);
+    while (firstRandomRoute == secondRandomRoute) {
+      secondRandomRoute = Random().nextInt(neighbor.length);
+    }
     neighbor[secondRandomRoute] = buildNewRoute(neighbor[secondRandomRoute],
         neighbor[firstRandomRoute][firstRandomCustomer]);
-    if (neighbor[firstRandomRoute].length == 3) {
+    neighbor[firstRandomRoute].removeAt(firstRandomCustomer);
+    if (neighbor[firstRandomRoute].length == 2) {
       neighbor.removeAt(firstRandomRoute);
-    } else {
-      neighbor[firstRandomRoute].removeAt(firstRandomCustomer);
     }
     return neighbor;
   }
 
   List<int> buildNewRoute(List<int> route, int newPoint) {
     List<int> newRoute = [];
-    int position = Random().nextInt(route.length - 2) + 1;
+    int position = Random().nextInt(route.length - 1) + 1;
     for (int i = 0; i < position; i++) {
       newRoute.add(route[i]);
     }
