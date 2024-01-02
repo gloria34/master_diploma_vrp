@@ -27,7 +27,6 @@ double gamma = 2; //time windows influence factor
 
 //da params
 double initialDemonEnergy = 200;
-int neighborhoodRadius = 400;
 double demonEnergyAlpha = 0.995;
 
 List<Color> randomColors = [];
@@ -315,8 +314,6 @@ class _ProblemParamsState extends State<_ProblemParams> {
       TextEditingController(text: initialDemonEnergy.toString());
   final TextEditingController demonEnergyAlphaController =
       TextEditingController(text: demonEnergyAlpha.toString());
-  final TextEditingController neighborhoodRadiusController =
-      TextEditingController(text: neighborhoodRadius.toString());
 
   @override
   Widget build(BuildContext context) {
@@ -556,16 +553,6 @@ class _ProblemParamsState extends State<_ProblemParams> {
             controller: initialDemonEnergyController,
           ),
         ),
-        const SizedBox(
-          width: 10,
-        ),
-        Expanded(
-          child: TextFormField(
-            decoration: const InputDecoration(labelText: 'Neighborhood radius'),
-            keyboardType: TextInputType.number,
-            controller: neighborhoodRadiusController,
-          ),
-        ),
       ],
     );
   }
@@ -597,7 +584,6 @@ class _ProblemParamsState extends State<_ProblemParams> {
 
   void setDaParams() {
     initialDemonEnergy = double.parse(initialDemonEnergyController.text);
-    neighborhoodRadius = int.parse(neighborhoodRadiusController.text);
     demonEnergyAlpha = double.parse(demonEnergyAlphaController.text);
   }
 }

@@ -32,6 +32,7 @@ class DeterministicAnnealing {
       } else {
         rejected++;
       }
+      int neighborhoodRadius = yTrip.length * numberOfCustomers;
       if (accepted == neighborhoodRadius ||
           rejected == 2 * neighborhoodRadius) {
         demonEnergy *= demonEnergyAlpha;
