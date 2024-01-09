@@ -697,9 +697,13 @@ class _SolutionLogs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return Column(
       children: [
         SelectableText(_getTenSolutionsString()),
+        Text('Average time = ${_getAverageTimeString()}'),
+        Text('Average length = ${_getAverageLengthString()}'),
+        Text(
+            'Average number of vehicles = ${_getAverageNumberOfVehiclesString()}'),
       ],
     );
   }
@@ -711,5 +715,29 @@ class _SolutionLogs extends StatelessWidget {
           "${solution.bestLength}\t${solution.bestPath.length}\t${solution.time}\n";
     }
     return result;
+  }
+
+  String _getAverageTimeString() {
+    int sum = 0;
+    for (final solution in tenSolutions) {
+      sum += solution.time;
+    }
+    return (sum / 10).toString();
+  }
+
+  String _getAverageLengthString() {
+    double sum = 0;
+    for (final solution in tenSolutions) {
+      sum += solution.bestLength;
+    }
+    return (sum / 10).toString();
+  }
+
+  String _getAverageNumberOfVehiclesString() {
+    int sum = 0;
+    for (final solution in tenSolutions) {
+      sum += solution.bestPath.length;
+    }
+    return (sum / 10).toString();
   }
 }
