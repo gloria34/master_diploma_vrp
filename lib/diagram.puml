@@ -1,0 +1,194 @@
+@startuml
+set namespaceSeparator ::
+
+class "master_diploma_vrp::ui::home::home_page_state.dart::HomePageState" {
+  +List<CustomerInfo> points
+  +ProblemResult? solution
+  +List<ProblemResult> tenSolutions
+  +int time
+}
+
+"master_diploma_vrp::ui::home::home_page_state.dart::HomePageState" o-- "master_diploma_vrp::model::problem_result.dart::ProblemResult"
+
+class "master_diploma_vrp::ui::home::home_page.dart::HomePage" {
+  +State<HomePage> createState()
+}
+
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "master_diploma_vrp::ui::home::home_page.dart::HomePage"
+
+class "master_diploma_vrp::ui::home::home_page.dart::_HomePageState" {
+  +HomePageCubit cubit
+  +Widget build()
+  +FutureOr<void> afterFirstLayout()
+  -void _generateRandomColors()
+}
+
+"master_diploma_vrp::ui::home::home_page.dart::_HomePageState" o-- "master_diploma_vrp::ui::home::home_page_cubit.dart::HomePageCubit"
+"flutter::src::widgets::framework.dart::State" <|-- "master_diploma_vrp::ui::home::home_page.dart::_HomePageState"
+"after_layout::after_layout.dart::AfterLayoutMixin" <|-- "master_diploma_vrp::ui::home::home_page.dart::_HomePageState"
+
+class "master_diploma_vrp::ui::home::home_page.dart::_ProblemParams" {
+  +dynamic Function(Problem) onSolveTap
+  +dynamic Function(Problem) onGetTenSolutionsTap
+  +State<StatefulWidget> createState()
+}
+
+"master_diploma_vrp::ui::home::home_page.dart::_ProblemParams" o-- "null::dynamic Function(Problem)"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "master_diploma_vrp::ui::home::home_page.dart::_ProblemParams"
+
+class "master_diploma_vrp::ui::home::home_page.dart::_ProblemParamsState" {
+  +TextEditingController problemTextController
+  +TextEditingController numberOfCustomersController
+  +TextEditingController vehicleCapacityController
+  +TextEditingController numberOfAntsController
+  +TextEditingController numberOfIterationsController
+  +TextEditingController alphaController
+  +TextEditingController betaController
+  +TextEditingController gammaController
+  +TextEditingController xiController
+  +TextEditingController upsilonController
+  +TextEditingController deltaController
+  +TextEditingController initialDemonEnergyController
+  +TextEditingController demonEnergyAlphaController
+  +Widget build()
+  -Widget _buildProblemFields()
+  -Widget _buildAcoFields()
+  -Widget _buildDaFields()
+  -void _setProblemParams()
+  +void setAcoParams()
+  +void setDaParams()
+}
+
+"master_diploma_vrp::ui::home::home_page.dart::_ProblemParamsState" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
+"flutter::src::widgets::framework.dart::State" <|-- "master_diploma_vrp::ui::home::home_page.dart::_ProblemParamsState"
+
+class "master_diploma_vrp::ui::home::home_page.dart::_CoordinatePlane" {
+  +List<CustomerInfo> points
+  +ProblemResult? answer
+  +State<StatefulWidget> createState()
+}
+
+"master_diploma_vrp::ui::home::home_page.dart::_CoordinatePlane" o-- "master_diploma_vrp::model::problem_result.dart::ProblemResult"
+"flutter::src::widgets::framework.dart::StatefulWidget" <|-- "master_diploma_vrp::ui::home::home_page.dart::_CoordinatePlane"
+
+class "master_diploma_vrp::ui::home::home_page.dart::_CoordinatePlaneState" {
+  -bool _isLabelsVisible
+  -TextEditingController _zoomXController
+  -TextEditingController _zoomYController
+  +Widget build()
+}
+
+"master_diploma_vrp::ui::home::home_page.dart::_CoordinatePlaneState" o-- "flutter::src::widgets::editable_text.dart::TextEditingController"
+"flutter::src::widgets::framework.dart::State" <|-- "master_diploma_vrp::ui::home::home_page.dart::_CoordinatePlaneState"
+
+class "master_diploma_vrp::ui::home::home_page.dart::_AnswerInfo" {
+  +ProblemResult answer
+  +int time
+  +Widget build()
+}
+
+"master_diploma_vrp::ui::home::home_page.dart::_AnswerInfo" o-- "master_diploma_vrp::model::problem_result.dart::ProblemResult"
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "master_diploma_vrp::ui::home::home_page.dart::_AnswerInfo"
+
+class "master_diploma_vrp::ui::home::home_page.dart::_SolutionLogs" {
+  +List<ProblemResult> tenSolutions
+  +Widget build()
+  -String _getTenSolutionsString()
+  -String _getAverageTimeString()
+  -String _getAverageLengthString()
+  -String _getAverageNumberOfVehiclesString()
+}
+
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "master_diploma_vrp::ui::home::home_page.dart::_SolutionLogs"
+
+class "master_diploma_vrp::ui::home::home_page_cubit.dart::HomePageCubit" {
+  +void solveProblem()
+  +void getTenSolutions()
+  -ProblemResult _getSolution()
+}
+
+"bloc::src::cubit.dart::Cubit" <|-- "master_diploma_vrp::ui::home::home_page_cubit.dart::HomePageCubit"
+
+abstract class "master_diploma_vrp::util::parser.dart::Parser" {
+  {static} +Problem parseVariant()
+}
+
+class "master_diploma_vrp::util::coordinate_painter.dart::CoordinatePainter" {
+  +List<CustomerInfo> points
+  +int zoomX
+  +int zoomY
+  +bool isLabelsVisible
+  +List<List<int>>? answer
+  +void paint()
+  -void _drawAxis()
+  -void _drawPoints()
+  -void _drawLines()
+  +bool shouldRepaint()
+}
+
+"flutter::src::rendering::custom_paint.dart::CustomPainter" <|-- "master_diploma_vrp::util::coordinate_painter.dart::CoordinatePainter"
+
+class "master_diploma_vrp::algorithm::deterministic_annealing.dart::DeterministicAnnealing" {
+  +List<CustomerInfo> customers
+  +ProblemResult deterministicAnnealing()
+  +List<List<int>> generateInitialSolution()
+  +double calculateLength()
+  +double calculateFines()
+  +List<List<int>> getNeighbor()
+  +List<int> buildNewRoute()
+}
+
+class "master_diploma_vrp::algorithm::ant_colony_optimization.dart::AntColonyOptimization" {
+  +List<CustomerInfo> customers
+  +ProblemResult antColony()
+  +AntActivityResult antActivity()
+}
+
+class "master_diploma_vrp::main.dart::MyApp" {
+  +Widget build()
+}
+
+"flutter::src::widgets::framework.dart::StatelessWidget" <|-- "master_diploma_vrp::main.dart::MyApp"
+
+class "master_diploma_vrp::model::problem.dart::Problem" {
+  +List<CustomerInfo> customer
+  +List<List<double>> dist
+}
+
+class "master_diploma_vrp::model::algorithm.dart::Algorithm" {
+  +int index
+  {static} +List<Algorithm> values
+  {static} +Algorithm antColonyOptimization
+}
+
+"master_diploma_vrp::model::algorithm.dart::Algorithm" o-- "master_diploma_vrp::model::algorithm.dart::Algorithm"
+"dart::core::Enum" <|-- "master_diploma_vrp::model::algorithm.dart::Algorithm"
+
+class "master_diploma_vrp::model::customer_info.dart::CustomerInfo" {
+  +int number
+  +List<double> position
+  +double demand
+  +double fromTime
+  +double dueTime
+  +double serviceTime
+  +List<Object?> props
+  +String toString()
+}
+
+"equatable::src::equatable.dart::Equatable" <|-- "master_diploma_vrp::model::customer_info.dart::CustomerInfo"
+
+class "master_diploma_vrp::model::ant_activity_result.dart::AntActivityResult" {
+  +List<List<int>> l
+  +List<List<double>> pr
+  +List<double> demand
+  +double length
+}
+
+class "master_diploma_vrp::model::problem_result.dart::ProblemResult" {
+  +double bestLength
+  +List<List<int>> bestPath
+  +int time
+}
+
+
+@enduml
