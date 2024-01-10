@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> with AfterLayoutMixin {
         builder: (context, state) => Scaffold(
             appBar: AppBar(
               backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-              title: const Text('VRPTW'),
+              title: const Text('VRPTW solver'),
             ),
             body: SingleChildScrollView(
               child: SizedBox(
