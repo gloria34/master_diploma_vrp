@@ -1,4 +1,4 @@
-@startuml
+@startuml diagram
 set namespaceSeparator ::
 
 class "master_diploma_vrp::ui::home::home_page_state.dart::HomePageState" {
