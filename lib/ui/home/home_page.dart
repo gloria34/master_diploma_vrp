@@ -498,7 +498,9 @@ class _AnswerInfo extends StatelessWidget {
       children: [
         SelectableText("Number of vehicles = ${answer.bestPath.length}"),
         SelectableText("Distance = ${answer.bestLength}"),
-        SelectableText("Time = $time")
+        SelectableText("Time = $time"),
+        SelectableText(
+            '${answer.bestPath.length}\t${answer.bestLength}\t$time'),
       ],
     );
   }
@@ -518,6 +520,8 @@ class _SolutionLogs extends StatelessWidget {
         Text('Average length = ${_getAverageLengthString()}'),
         Text(
             'Average number of vehicles = ${_getAverageNumberOfVehiclesString()}'),
+        SelectableText(
+            '${_getAverageNumberOfVehiclesString()}\t${_getAverageLengthString()}\t${_getAverageTimeString()}'),
       ],
     );
   }

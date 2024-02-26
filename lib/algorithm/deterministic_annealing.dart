@@ -24,6 +24,7 @@ class DeterministicAnnealing {
       double y = yLength + calculateFines(d, yTrip);
       final double delta = y - x;
       if (delta < demonEnergy && delta != 0.0) {
+       // demonEnergy -= delta.abs();
         xTrip = yTrip;
         xLength = yLength;
         x = y;
@@ -34,9 +35,9 @@ class DeterministicAnnealing {
       }
       int neighborhoodRadius = yTrip.length * numberOfCustomers;
       if (accepted == neighborhoodRadius ||
-          rejected == 2 * neighborhoodRadius) {
+          rejected >= 2 * neighborhoodRadius) {
         demonEnergy *= demonEnergyAlpha;
-        if (rejected == 2 * neighborhoodRadius) {
+        if (rejected >= 2 * neighborhoodRadius) {
           frozen++;
         }
         accepted = 0;
